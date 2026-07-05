@@ -232,6 +232,17 @@ export interface IPlatformConfig {
   features: IFeatureFlags;
 }
 
+export interface IAuditLogEntry {
+  id: string;
+  userId: string | null;
+  action: string;
+  entity: string | null;
+  entityId: string | null;
+  oldValue: unknown;
+  newValue: unknown;
+  createdAt: string;
+}
+
 /* ── API Wrappers ── */
 
 export type { IExploreCard, IExploreFilters } from "./explore";
