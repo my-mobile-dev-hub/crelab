@@ -8,5 +8,11 @@
       "main": true,
       "preview": true
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/drive-sync",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }
