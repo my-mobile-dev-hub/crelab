@@ -116,6 +116,62 @@
 - Fix: Add to deployment environment variables
 - Prevention: Add a startup validation check that throws if required env vars are missing
 
+### Better Auth — Missing Secret/BaseURL (Deployment Failure)
+
+**Symptom:**
+Build succeeds locally but Vercel deployment fails. During static page generation:
+```
+WARN [Better Auth]: Base URL is not set.
+Error [BetterAuthError]: You are using the default secret.
+```
+
+**Root Cause:**
+`lib/auth.ts` did not pass `secret` or `baseURL` to the Better Auth config. Better Auth generates a default secret but explicitly rejects it in production, throwing an error during static generation on Vercel.
+
+**Fix Applied:**
+1. Added `secret: process.env.BETTER_AUTH_SECRET` to read from env var with a dev fallback
+2. Added `baseURL: process.env.BETTER_AUTH_URL` to read from env var with a dev fallback
+
+**Prevention:**
+Always pass `secret` and `baseURL` to Better Auth config when initializing. Ensure `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` are set in Vercel environment variables. Keep `.env.example` updated as the source of truth for required env vars.
+
+**Files Affected:**
+- `lib/auth.ts`
+
+**Date:** 2026-07-05
+**Status:** Active
+
+---
+
+### Next.js 15.3.1 — Vulnerable Version Blocking Vercel Deployment
+
+**Symptom:**
+Build succeeds structurally but Vercel deployment fails with:
+```
+Vulnerable version of Next.js detected, please update immediately.
+```
+During install:
+```
+npm warn deprecated next@15.3.1: This version has a security vulnerability.
+```
+
+**Root Cause:**
+`next@15.3.1` is affected by CVE-2025-66478 — a critical (CVSS 10.0) remote code execution vulnerability in the React Server Components protocol. Vercel's pipeline now actively blocks deployments using vulnerable versions.
+
+**Fix Applied:**
+Updated `package.json` dependency from `"next": "^15.3.1"` to `"next": "^15.5.20"` (latest stable 15.x, fully patched).
+
+**Prevention:**
+Keep `next` dependency at the latest stable 15.x version. Run `npm outdated` regularly. Vercel's deployment gate will now enforce patched versions — any future vulnerability will be caught at deploy time.
+
+**Files Affected:**
+- `package.json`
+
+**Date:** 2026-07-05
+**Status:** Active
+
+---
+
 **Config Value Not Updating After Admin Change**
 - Symptom: Frontend still shows old platform name/colour after admin update
 - Cause: `ConfigContext` not re-fetching after DB update; stale cache

@@ -232,6 +232,50 @@ Provider Dashboard, tests, messaging (Phase 2)
 
 ---
 
+## Session 6 — 2026-07-05 (Fix Build — Vercel Deployment)
+
+**Completed:**
+Fixed two issues preventing Vercel deployment:
+
+1. **Better Auth missing `secret` and `baseURL`** — `lib/auth.ts` now reads `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` from env vars with dev fallbacks. Previously the missing config caused Better Auth to throw `[BetterAuthError]: You are using the default secret` during static page generation, causing Vercel deployment failure.
+
+2. **TypeScript error in BookingDrawer.tsx** — `window as Record<string, unknown>` cast failed because `Window` type lacks index signature. Fixed with `window as unknown as Record<string, unknown>` (double cast via `unknown`).
+
+**Files Modified:**
+- `lib/auth.ts` — added `secret` and `baseURL` from env vars
+- `components/booking/BookingDrawer.tsx` — fixed TypeScript double-cast
+- `.ai-system/repair-system.md` — logged Better Auth error entry
+- `.ai-system/checkpoints/session-log.md` — this entry
+- `.ai-system/checkpoints/in-progress.md` — cleared
+
+**Build Status:** ✅ Production build passes (33 pages, middleware, zero errors/warnings)
+
+**Next Task:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+---
+
+## Session 7 — 2026-07-05 (Fix Build — Next.js CVE-2025-66478)
+
+**Completed:**
+Fixed Vercel deployment failure caused by vulnerable Next.js version:
+
+1. **Next.js 15.3.1 → 15.5.20** — Updated `next` dependency in `package.json` from `^15.3.1` to `^15.5.20`. Version 15.3.1 is affected by CVE-2025-66478, a critical (CVSS 10.0) RCE vulnerability in the React Server Components protocol. Vercel's deployment pipeline actively blocks builds using unpatched versions with: `Vulnerable version of Next.js detected, please update immediately.` The 15.5.20 release is the latest stable 15.x and fully patched.
+
+**Files Modified:**
+- `package.json` — next version bump
+- `package-lock.json` — updated lockfile
+- `.ai-system/repair-system.md` — logged Next.js vulnerability entry
+- `.ai-system/checkpoints/session-log.md` — this entry
+- `.ai-system/checkpoints/in-progress.md` — updated
+
+**Build Status:** ✅ Clean production build — 33 pages, middleware, zero errors. Next.js 15.5.20.
+
+**Next Task:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+---
+
 ## Session 5 — 2026-07-05 (Update AI System — Reconciliation)
 
 **Completed:**
