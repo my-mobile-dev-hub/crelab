@@ -5,6 +5,8 @@ import { phoneNumber } from "better-auth/plugins";
 import * as schema from "@/drizzle/schema";
 
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET || "dev-secret-do-not-use-in-production",
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
