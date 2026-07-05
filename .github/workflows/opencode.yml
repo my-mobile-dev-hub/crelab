@@ -16,7 +16,7 @@ jobs:
         contains(github.event.comment.body, ' /opencode') ||
         startsWith(github.event.comment.body, '/opencode')
       )
-    uses: my-mobile-dev-hub/.github-workflows/.github/workflows/opencode-runner.yml@main
+    uses: sotonye-dagogo-dev/.github-workflows/.github/workflows/opencode-runner.yml@main
     secrets: inherit
 
   opencode-design:
@@ -30,5 +30,5 @@ jobs:
         contains(github.event.comment.body, ' /opendesign') ||
         startsWith(github.event.comment.body, '/opendesign')
       )
-    uses: my-mobile-dev-hub/.github-workflows/.github/workflows/opendesign-runner.yml@main
+    uses: sotonye-dagogo-dev/.github-workflows/.github/workflows/opendesign-runner.yml@main
     secrets: inherit
