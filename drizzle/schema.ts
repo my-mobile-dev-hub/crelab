@@ -103,6 +103,7 @@ export const providers = pgTable("providers", {
   avatarUrl: text("avatar_url"),
   active: boolean("active").notNull().default(false),
   verified: boolean("verified").notNull().default(false),
+  featured: boolean("featured").notNull().default(false),
   driveFolderUrl: text("drive_folder_url"),
   /** Money in kobo - profile view count */
   profileViews: integer("profile_views").notNull().default(0),
@@ -310,4 +311,19 @@ export const consentRecordsRelations = relations(consentRecords, ({ one }) => ({
   user: one(user, { fields: [consentRecords.userId], references: [user.id] }),
 }));
 
+export const auditLog = pgTable("audit_log", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => user.id),
+  action: text("action").notNull(),
+  entity: text("entity"),
+  entityId: text("entity_id"),
+  oldValue: jsonb("old_value"),
+  newValue: jsonb("new_value"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const platformConfigRelations = relations(platformConfig, () => ({}));
+
+export const auditLogRelations = relations(auditLog, ({ one }) => ({
+  user: one(user, { fields: [auditLog.userId], references: [user.id] }),
+}));
