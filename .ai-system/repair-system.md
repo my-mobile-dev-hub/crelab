@@ -143,6 +143,35 @@ Always pass `secret` and `baseURL` to Better Auth config when initializing. Ensu
 
 ---
 
+### Next.js 15.3.1 — Vulnerable Version Blocking Vercel Deployment
+
+**Symptom:**
+Build succeeds structurally but Vercel deployment fails with:
+```
+Vulnerable version of Next.js detected, please update immediately.
+```
+During install:
+```
+npm warn deprecated next@15.3.1: This version has a security vulnerability.
+```
+
+**Root Cause:**
+`next@15.3.1` is affected by CVE-2025-66478 — a critical (CVSS 10.0) remote code execution vulnerability in the React Server Components protocol. Vercel's pipeline now actively blocks deployments using vulnerable versions.
+
+**Fix Applied:**
+Updated `package.json` dependency from `"next": "^15.3.1"` to `"next": "^15.5.20"` (latest stable 15.x, fully patched).
+
+**Prevention:**
+Keep `next` dependency at the latest stable 15.x version. Run `npm outdated` regularly. Vercel's deployment gate will now enforce patched versions — any future vulnerability will be caught at deploy time.
+
+**Files Affected:**
+- `package.json`
+
+**Date:** 2026-07-05
+**Status:** Active
+
+---
+
 **Config Value Not Updating After Admin Change**
 - Symptom: Frontend still shows old platform name/colour after admin update
 - Cause: `ConfigContext` not re-fetching after DB update; stale cache
