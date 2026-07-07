@@ -19,7 +19,7 @@ export async function Footer() {
   return (
     <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="mx-auto max-w-[1200px] px-6 pb-6 pt-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 grid-cols-2 lg:grid-cols-4">
           <div>
             <h4 className="mb-3 font-[family-name:var(--font-display)] text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--color-text-tertiary)]">
               {config.name}
@@ -28,6 +28,7 @@ export async function Footer() {
               {config.tagline}
             </p>
           </div>
+          <FooterClient />
           <div>
             <h4 className="mb-3 font-[family-name:var(--font-display)] text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--color-text-tertiary)]">
               Platform
@@ -90,7 +91,6 @@ export async function Footer() {
         <div className="mt-6 flex items-center justify-between border-t border-[var(--color-border)] pt-4 text-[12px] text-[var(--color-text-tertiary)]">
           <span>&copy; {new Date().getFullYear()} {config.name}. All rights reserved.</span>
           <div className="flex items-center gap-4">
-            <FooterClient />
             <a
               href={devCredit.url}
               target="_blank"
