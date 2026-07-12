@@ -8,7 +8,7 @@ import type {
   IServicePackage,
   IReview,
 } from "@/types";
-import { BookingStatus, EscrowState, ExperienceLevel, PortfolioItemSource, UserRole } from "@/types";
+import { BookingStatus, EscrowState, ExperienceLevel, PaymentMode, PortfolioItemSource, UserRole } from "@/types";
 
 export class MockDataService {
   static isEnabled(): boolean {
@@ -481,6 +481,7 @@ export class MockDataService {
         fee: 2500,
         total: 52500,
         serviceDate: new Date(now.getTime() + 7 * 86400000).toISOString(),
+        paymentMode: PaymentMode.ESCROW,
         scopeNotes: "Lifestyle shoot for new clothing line launch. Need 3 outfits covered.",
         releaseDeadline: new Date(now.getTime() + 14 * 86400000).toISOString(),
         paystackRef: "mock-ref-001",
@@ -494,6 +495,7 @@ export class MockDataService {
         packageId: "mock-pkg-2-1",
         status: BookingStatus.IN_PROGRESS,
         escrowState: EscrowState.IN_PROGRESS,
+        paymentMode: PaymentMode.ESCROW,
         subtotal: 150000,
         fee: 7500,
         total: 157500,
@@ -511,6 +513,7 @@ export class MockDataService {
         packageId: "mock-pkg-3-2",
         status: BookingStatus.REQUESTED,
         escrowState: EscrowState.PENDING,
+        paymentMode: PaymentMode.ESCROW,
         subtotal: 65000,
         fee: 3250,
         total: 68250,
@@ -528,6 +531,7 @@ export class MockDataService {
         packageId: "mock-pkg-1-2",
         status: BookingStatus.RELEASED,
         escrowState: EscrowState.RELEASED,
+        paymentMode: PaymentMode.ESCROW,
         subtotal: 120000,
         fee: 6000,
         total: 126000,

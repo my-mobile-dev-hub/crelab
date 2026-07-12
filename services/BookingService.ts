@@ -3,7 +3,7 @@ import { bookings, providers, servicePackages } from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { PlatformConfigService } from "@/services/PlatformConfigService";
 import type { IBooking } from "@/types";
-import { BookingStatus } from "@/types";
+import { BookingStatus, PaymentMode } from "@/types";
 
 const LEGAL_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
   [BookingStatus.REQUESTED]: [BookingStatus.ACCEPTED, BookingStatus.DECLINED, BookingStatus.CANCELLED],
@@ -56,6 +56,7 @@ function mapBooking(row: typeof bookings.$inferSelect): IBooking {
     serviceDate: row.serviceDate?.toISOString() ?? null,
     scopeNotes: row.scopeNotes,
     releaseDeadline: row.releaseDeadline?.toISOString() ?? null,
+    paymentMode: (row.paymentMode ?? "ESCROW") as PaymentMode,
     paystackRef: row.paystackRef,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
