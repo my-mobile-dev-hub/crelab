@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -23,6 +24,15 @@ export const escrowStateEnum = pgEnum("escrow_state", [
 export const portfolioSourceEnum = pgEnum("portfolio_source", ["DIRECT", "DRIVE"]);
 export const experienceLevelEnum = pgEnum("experience_level", ["EMERGING", "ESTABLISHED", "VETERAN"]);
 export const consentTypeEnum = pgEnum("consent_type", ["TERMS", "MARKETING", "ANALYTICS"]);
+export const paymentModeEnum = pgEnum("payment_mode", ["ESCROW", "MILESTONE", "DIRECT"]);
+export const walletTransactionTypeEnum = pgEnum("wallet_transaction_type", [
+  "TOPUP_CARD", "TOPUP_BANK", "BOOKING_DEBIT", "ESCROW_HOLD", "ESCROW_RELEASE",
+  "MILESTONE_DEBIT", "MILESTONE_RELEASE", "DIRECT_PAYMENT_DEBIT", "DIRECT_PAYMENT_CREDIT",
+  "WITHDRAWAL", "FEE_DEBIT", "REFUND",
+]);
+export const milestoneStatusEnum = pgEnum("milestone_status", [
+  "PENDING", "FUNDED", "IN_PROGRESS", "SUBMITTED", "APPROVED", "DISPUTED", "RELEASED", "REFUNDED", "CANCELLED",
+]);
 
 /* ── Better Auth Core Tables ── */
 
@@ -157,6 +167,7 @@ export const bookings = pgTable("bookings", {
     .references(() => servicePackages.id),
   status: bookingStatusEnum("status").notNull().default("REQUESTED"),
   escrowState: escrowStateEnum("escrow_state").notNull().default("PENDING"),
+  paymentMode: paymentModeEnum("payment_mode").notNull().default("ESCROW"),
   /** Money in kobo */
   subtotal: integer("subtotal").notNull(),
   /** Money in kobo */
@@ -169,6 +180,67 @@ export const bookings = pgTable("bookings", {
   paystackRef: text("paystack_ref"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const wallets = pgTable("wallets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" })
+    .unique(),
+  balanceKobo: integer("balance_kobo").notNull().default(0),
+  escrowKobo: integer("escrow_kobo").notNull().default(0),
+  totalEarnedKobo: integer("total_earned_kobo").notNull().default(0),
+  dvaAccountNumber: text("dva_account_number"),
+  dvaBankName: text("dva_bank_name"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const bookingMilestones = pgTable("booking_milestones", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  bookingId: text("booking_id")
+    .notNull()
+    .references(() => bookings.id, { onDelete: "cascade" }),
+  index: integer("index").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  amountKobo: integer("amount_kobo").notNull(),
+  feeKobo: integer("fee_kobo").notNull(),
+  status: milestoneStatusEnum("status").notNull().default("PENDING"),
+  dueDate: timestamp("due_date", { withTimezone: true }),
+  fundedAt: timestamp("funded_at", { withTimezone: true }),
+  submittedAt: timestamp("submitted_at", { withTimezone: true }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  releasedAt: timestamp("released_at", { withTimezone: true }),
+  reviewDeadline: timestamp("review_deadline", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  bookingIndexUnique: uniqueIndex("booking_milestones_booking_id_index_unique").on(table.bookingId, table.index),
+}));
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  walletId: uuid("wallet_id")
+    .notNull()
+    .references(() => wallets.id),
+  type: walletTransactionTypeEnum("type").notNull(),
+  amountKobo: integer("amount_kobo").notNull(),
+  direction: text("direction", { enum: ["CREDIT", "DEBIT"] }).notNull(),
+  balanceAfterKobo: integer("balance_after_kobo").notNull(),
+  reference: text("reference").notNull().unique(),
+  relatedBookingId: text("related_booking_id").references(() => bookings.id),
+  relatedMilestoneId: uuid("related_milestone_id").references(() => bookingMilestones.id),
+  paystackRef: text("paystack_ref"),
+  metadata: jsonb("metadata").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const processedWebhookEvents = pgTable("processed_webhook_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  paystackRef: text("paystack_ref").notNull().unique(),
+  eventType: text("event_type").notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const payments = pgTable("payments", {
@@ -289,6 +361,8 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   payments: many(payments),
   reviews: many(reviews),
   disputes: many(disputes),
+  milestones: many(bookingMilestones),
+  walletTransactions: many(walletTransactions),
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
@@ -342,6 +416,23 @@ export const teamMembersRelations = relations(teamMembers, () => ({}));
 export const auditLogRelations = relations(auditLog, ({ one }) => ({
   user: one(user, { fields: [auditLog.userId], references: [user.id] }),
 }));
+
+export const walletsRelations = relations(wallets, ({ one, many }) => ({
+  user: one(user, { fields: [wallets.userId], references: [user.id] }),
+  transactions: many(walletTransactions),
+}));
+
+export const bookingMilestonesRelations = relations(bookingMilestones, ({ one }) => ({
+  booking: one(bookings, { fields: [bookingMilestones.bookingId], references: [bookings.id] }),
+}));
+
+export const walletTransactionsRelations = relations(walletTransactions, ({ one }) => ({
+  wallet: one(wallets, { fields: [walletTransactions.walletId], references: [wallets.id] }),
+  booking: one(bookings, { fields: [walletTransactions.relatedBookingId], references: [bookings.id] }),
+  milestone: one(bookingMilestones, { fields: [walletTransactions.relatedMilestoneId], references: [bookingMilestones.id] }),
+}));
+
+export const processedWebhookEventsRelations = relations(processedWebhookEvents, () => ({}));
 
 export const bugReportStatusEnum = pgEnum("bug_report_status", ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]);
 export const bugReportSeverityEnum = pgEnum("bug_report_severity", ["LOW", "MEDIUM", "HIGH", "CRITICAL"]);

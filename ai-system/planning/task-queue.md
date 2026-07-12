@@ -32,7 +32,8 @@ All Milestones substantially complete. Blog system, sitemap/robots completed. Re
 
 | Size | Task | Status |
 |------|------|--------|
-| [M] | Write tests for all services | [ ] |
+| [XL] | Payment System Expansion — Wallet, Milestone, Direct modes | [x] |
+| [M] | Write tests for all services (incl. payment expansion) | [ ] |
 | [M] | Provider Dashboard (full) with earnings, kanban pipeline, availability calendar | [ ] |
 | [M] | Client Dashboard: active bookings, booking history, payment history | [ ] |
 | [L] | In-platform messaging (Phase 2) | [ ] |
@@ -89,6 +90,20 @@ All Milestones substantially complete. Blog system, sitemap/robots completed. Re
 | OC-7: Production gate: build + tsc + lint pass with zero errors/warnings | 2026-07-05 |
 | Sanity CMS blog system: schema, config, /blog, /blog/[slug], blog components | 2026-07-05 |
 | sitemap.ts + robots.ts (Next.js generated SEO) | 2026-07-05 |
+| Payment Expansion: types, enums, error classes | 2026-07-12 |
+| Payment Expansion: DB schema, migration, RLS (wallets, transactions, milestones, webhook events) | 2026-07-12 |
+| Payment Expansion: platform config (milestonePayments, wallet blocks) | 2026-07-12 |
+| Payment Expansion: WalletService (9 methods, idempotency, atomic transactions) | 2026-07-12 |
+| Payment Expansion: MilestoneService (create, fund, submit, approve, autoApprove, dispute) | 2026-07-12 |
+| Payment Expansion: Paystack lib (initiateTransfer, DVA, getRecipient) | 2026-07-12 |
+| Payment Expansion: Webhook handler (charge.success, transfer events, DVA assignment) | 2026-07-12 |
+| Payment Expansion: Wallet API routes (topup/card, topup/bank, balance, withdraw, transactions) | 2026-07-12 |
+| Payment Expansion: Milestones API route | 2026-07-12 |
+| Payment Expansion: Milestones cron + vercel.json update | 2026-07-12 |
+| Payment Expansion: UI components (WalletBalanceCard, TopUpModal, WithdrawModal) | 2026-07-12 |
+| Payment Expansion: UI components (MilestoneBuilder, MilestoneTimeline) | 2026-07-12 |
+| Payment Expansion: Wallet page + middleware update | 2026-07-12 |
+| Payment Expansion: Booking detail updated for all payment modes | 2026-07-12 |
 
 ---
 

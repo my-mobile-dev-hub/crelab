@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ClButton, ClBadge } from "@/components/ui";
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { EscrowTimeline } from "@/components/booking/EscrowTimeline";
+import { MilestoneTimeline } from "@/components/booking/MilestoneTimeline";
 import { DisputeModal } from "@/components/booking/DisputeModal";
 import { useAuth } from "@/hooks/useAuth";
-import type { IBooking, IPayment } from "@/types";
+import type { IBooking, IPayment, IBookingMilestone } from "@/types";
 
 interface BookingDetailData {
   booking: IBooking;
@@ -52,9 +53,12 @@ function statusBadgeVariant(status: string) {
 export function BookingDetailClient({ data }: BookingDetailClientProps) {
   const { user } = useAuth();
   const [showDispute, setShowDispute] = useState(false);
+  const [milestones, setMilestones] = useState<IBookingMilestone[]>([]);
 
   const viewerRole =
     user?.id === data.client?.id ? "CLIENT" : "PROVIDER";
+  const isClient = viewerRole === "CLIENT";
+  const isProvider = viewerRole === "PROVIDER";
 
   const handleConfirmRelease = useCallback(async () => {
     try {
@@ -70,6 +74,65 @@ export function BookingDetailClient({ data }: BookingDetailClientProps) {
     }
   }, [data.booking.id]);
 
+  const fetchMilestones = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/milestones?bookingId=${data.booking.id}`);
+      const json = await res.json();
+      if (json.success) setMilestones(json.data);
+    } catch {
+    }
+  }, [data.booking.id]);
+
+  const handleFundMilestone = useCallback(async (milestoneId: string) => {
+    try {
+      const res = await fetch("/api/milestones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "fund", milestoneId }),
+      });
+      const json = await res.json();
+      if (json.success) fetchMilestones();
+    } catch {
+    }
+  }, [fetchMilestones]);
+
+  const handleSubmitMilestone = useCallback(async (milestoneId: string) => {
+    try {
+      const res = await fetch("/api/milestones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "submit", milestoneId }),
+      });
+      const json = await res.json();
+      if (json.success) fetchMilestones();
+    } catch {
+    }
+  }, [fetchMilestones]);
+
+  const handleApproveMilestone = useCallback(async (milestoneId: string) => {
+    try {
+      const res = await fetch("/api/milestones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve", milestoneId }),
+      });
+      const json = await res.json();
+      if (json.success) fetchMilestones();
+    } catch {
+    }
+  }, [fetchMilestones]);
+
+  const handleDisputeMilestone = useCallback(async () => {
+    setShowDispute(true);
+  }, []);
+
+  const isMilestoneMode = data.booking.paymentMode === "MILESTONE";
+  const isDirectMode = data.booking.paymentMode === "DIRECT";
+
+  useEffect(() => {
+    if (isMilestoneMode) fetchMilestones();
+  }, [isMilestoneMode, fetchMilestones]);
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-[800px] mx-auto px-4 py-8">
@@ -82,9 +145,14 @@ export function BookingDetailClient({ data }: BookingDetailClientProps) {
               ID: {data.booking.id.slice(0, 8).toUpperCase()}
             </p>
           </div>
-          <ClBadge variant={statusBadgeVariant(data.booking.status)}>
-            {data.booking.status.replace("_", " ")}
-          </ClBadge>
+          <div className="flex items-center gap-2">
+            <ClBadge variant="default">
+              {data.booking.paymentMode}
+            </ClBadge>
+            <ClBadge variant={statusBadgeVariant(data.booking.status)}>
+              {data.booking.status.replace("_", " ")}
+            </ClBadge>
+          </div>
         </div>
 
         {data.provider && (
@@ -138,13 +206,51 @@ export function BookingDetailClient({ data }: BookingDetailClientProps) {
           </div>
         )}
 
-        <EscrowTimeline
-          booking={data.booking}
-          payment={data.payment}
-          viewerRole={viewerRole}
-          onConfirmRelease={handleConfirmRelease}
-          onRaiseDispute={() => setShowDispute(true)}
-        />
+        {isMilestoneMode ? (
+          <MilestoneTimeline
+            milestones={milestones}
+            isClient={isClient}
+            isProvider={isProvider}
+            onFund={isClient ? handleFundMilestone : undefined}
+            onSubmit={isProvider ? handleSubmitMilestone : undefined}
+            onApprove={isClient ? handleApproveMilestone : undefined}
+            onDispute={isClient ? handleDisputeMilestone : undefined}
+          />
+        ) : (
+          <EscrowTimeline
+            booking={data.booking}
+            payment={data.payment}
+            viewerRole={viewerRole}
+            onConfirmRelease={handleConfirmRelease}
+            onRaiseDispute={() => setShowDispute(true)}
+          />
+        )}
+
+        {isDirectMode && isClient && (
+          <div className="mt-5">
+            <ClButton
+              variant="primary"
+              fullWidth
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/wallet/topup/card", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amountKobo: data.booking.total }),
+                  });
+                  const json = await res.json();
+                  if (json.success) {
+                    window.location.href = json.data.authorizationUrl;
+                  }
+                } catch {
+                }
+              }}
+            >
+              <Plus size={14} strokeWidth={2} />
+              Add Payment
+            </ClButton>
+          </div>
+        )}
 
         <div className="mt-5 flex justify-end">
           <ClButton

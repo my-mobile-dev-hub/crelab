@@ -1,5 +1,38 @@
 /* ── Enums ── */
 
+export enum WalletTransactionType {
+  TOPUP_CARD = "TOPUP_CARD",
+  TOPUP_BANK = "TOPUP_BANK",
+  BOOKING_DEBIT = "BOOKING_DEBIT",
+  ESCROW_HOLD = "ESCROW_HOLD",
+  ESCROW_RELEASE = "ESCROW_RELEASE",
+  MILESTONE_DEBIT = "MILESTONE_DEBIT",
+  MILESTONE_RELEASE = "MILESTONE_RELEASE",
+  DIRECT_PAYMENT_DEBIT = "DIRECT_PAYMENT_DEBIT",
+  DIRECT_PAYMENT_CREDIT = "DIRECT_PAYMENT_CREDIT",
+  WITHDRAWAL = "WITHDRAWAL",
+  FEE_DEBIT = "FEE_DEBIT",
+  REFUND = "REFUND",
+}
+
+export enum MilestoneStatus {
+  PENDING = "PENDING",
+  FUNDED = "FUNDED",
+  IN_PROGRESS = "IN_PROGRESS",
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
+  DISPUTED = "DISPUTED",
+  RELEASED = "RELEASED",
+  REFUNDED = "REFUNDED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum PaymentMode {
+  ESCROW = "ESCROW",
+  MILESTONE = "MILESTONE",
+  DIRECT = "DIRECT",
+}
+
 export enum UserRole {
   CLIENT = "CLIENT",
   PROVIDER = "PROVIDER",
@@ -133,6 +166,7 @@ export interface IBooking {
   scopeNotes: string | null;
   /** ISO 8601 */
   releaseDeadline: string | null;
+  paymentMode: PaymentMode;
   paystackRef: string | null;
   /** ISO 8601 */
   createdAt: string;
@@ -152,6 +186,50 @@ export interface IPayment {
   paystackRef: string;
   status: string;
   /** ISO 8601 */
+  createdAt: string;
+}
+
+export interface IWallet {
+  id: string;
+  userId: string;
+  balanceKobo: number;
+  escrowKobo: number;
+  totalEarnedKobo: number;
+  dvaAccountNumber?: string;
+  dvaBankName?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IWalletTransaction {
+  id: string;
+  walletId: string;
+  type: WalletTransactionType;
+  amountKobo: number;
+  direction: "CREDIT" | "DEBIT";
+  balanceAfterKobo: number;
+  reference: string;
+  relatedBookingId?: string;
+  relatedMilestoneId?: string;
+  paystackRef?: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface IBookingMilestone {
+  id: string;
+  bookingId: string;
+  index: number;
+  title: string;
+  description?: string;
+  amountKobo: number;
+  feeKobo: number;
+  status: MilestoneStatus;
+  dueDate?: string;
+  fundedAt?: string;
+  submittedAt?: string;
+  approvedAt?: string;
+  releasedAt?: string;
   createdAt: string;
 }
 
@@ -242,6 +320,22 @@ export interface IDevCredit {
   url: string;
 }
 
+export interface IMilestonePaymentsConfig {
+  enabled: boolean;
+  minBookingAmountKobo: number;
+  maxMilestones: number;
+  minMilestones: number;
+  minMilestoneAmountKobo: number;
+  reviewWindowDays: number;
+}
+
+export interface IWalletConfig {
+  enabled: boolean;
+  minTopUpKobo: number;
+  minWithdrawalKobo: number;
+  maxDvaAccounts: number;
+}
+
 export interface IPlatformConfig {
   name: string;
   tagline: string;
@@ -251,6 +345,8 @@ export interface IPlatformConfig {
   cancellationPolicy: ICancellationPolicy;
   categories: ICategoryConfig[];
   features: IFeatureFlags;
+  milestonePayments: IMilestonePaymentsConfig;
+  wallet: IWalletConfig;
   devCredit?: IDevCredit;
 }
 

@@ -97,6 +97,102 @@ export async function subaccountSplit(
   };
 }
 
+export async function initiateTransfer(
+  amountKobo: number,
+  recipientCode: string,
+  reference: string,
+): Promise<{ transferCode: string }> {
+  const res = await fetch(`${PAYSTACK_BASE}/transfer`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      source: "balance",
+      amount: amountKobo,
+      recipient: recipientCode,
+      reference,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Paystack transfer failed: ${res.status} ${body}`);
+  }
+
+  const json = await res.json();
+  if (!json.status) {
+    throw new Error(`Paystack transfer error: ${json.message}`);
+  }
+
+  return { transferCode: json.data.transfer_code };
+}
+
+export async function createDedicatedVirtualAccount(
+  customerEmail: string,
+  customerName: string,
+  phone?: string,
+): Promise<{
+  accountNumber: string;
+  bankName: string;
+}> {
+  const res = await fetch(`${PAYSTACK_BASE}/dedicated_account`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      customer: {
+        email: customerEmail,
+        name: customerName,
+        phone: phone ?? null,
+      },
+      preferred_bank: "wema-bank",
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Paystack DVA creation failed: ${res.status} ${body}`);
+  }
+
+  const json = await res.json();
+  if (!json.status) {
+    throw new Error(`Paystack DVA creation error: ${json.message}`);
+  }
+
+  return {
+    accountNumber: json.data.dedicated_account.account_number,
+    bankName: json.data.dedicated_account.bank.name,
+  };
+}
+
+export async function getTransferRecipient(
+  bankCode: string,
+  accountNumber: string,
+  name: string,
+): Promise<{ recipientCode: string }> {
+  const res = await fetch(`${PAYSTACK_BASE}/transferrecipient`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      type: "nuban",
+      name,
+      account_number: accountNumber,
+      bank_code: bankCode,
+      currency: "NGN",
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Paystack recipient creation failed: ${res.status} ${body}`);
+  }
+
+  const json = await res.json();
+  if (!json.status) {
+    throw new Error(`Paystack recipient creation error: ${json.message}`);
+  }
+
+  return { recipientCode: json.data.recipient_code };
+}
+
 export async function refund(paystackRef: string): Promise<void> {
   const res = await fetch(`${PAYSTACK_BASE}/refund`, {
     method: "POST",
