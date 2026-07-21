@@ -1,8 +1,8 @@
 # Lessons Learned
 
 > **Metadata**
-> - last-updated-by: update-ai-system
-> - last-verified-against-code: 2026-07-05 (OC-7 reconciliation)
+> - last-updated-by: execute-feature
+> - last-verified-against-code: 2026-07-21
 > - staleness-policy: each entry has its own staleness — check supersedes links
 
 > **Overview:** Practical knowledge accumulated during Crelab development. Tracks development process insights and architectural wisdom. Uses supersedes/superseded-by links for evolving practices.
@@ -77,6 +77,21 @@
 **What We Learned:** Server components can `await` data fetching directly (no `useEffect`). Root layout `layout.tsx` uses `async function RootLayout` with `PlatformConfigService.getCached()`. Falls back to `DEFAULT_CONFIG` if DB fails so the app doesn't crash on cold start.
 
 **Apply When:** Any server component or layout that needs async data.
+
+**Supersedes:** None
+**Superseded by:** None
+
+## Better Auth Dash Plugin Setup
+
+**Context:** Dash ownership verification failed on the Better Auth dashboard because the `dash()` plugin wasn't registered and the `BETTER_AUTH_SECRET` was a placeholder.
+
+**What We Learned:**
+1. The `@better-auth/infra` package exports `{ dash }` from its main entry (`import { dash } from "@better-auth/infra"`), not from a plugins subpath
+2. The `BETTER_AUTH_SECRET` must be a real generated secret, not a placeholder
+3. After adding the Dash plugin, the app must be redeployed for ownership verification to pass
+4. `.env.example` should include `BETTER_AUTH_API_KEY` so it's documented
+
+**Apply When:** Setting up or troubleshooting Better Auth Dash dashboard integration.
 
 **Supersedes:** None
 **Superseded by:** None

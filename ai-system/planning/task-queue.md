@@ -1,8 +1,8 @@
 # Development Task Queue
 
 > **Metadata**
-> - last-updated-by: update-ai-system
-> - last-verified-against-code: 2026-07-05 (OC-7 reconciliation)
+> - last-updated-by: execute-feature
+> - last-verified-against-code: 2026-07-21
 > - staleness-policy: re-verify before each session
 
 > **Overview:** Sprint-level task queue with complexity tagging. Agents execute tasks top to bottom within the current sprint. Each task is sized so it can be completed in a single session.
@@ -61,6 +61,7 @@ All Milestones substantially complete. Blog system, sitemap/robots completed. Re
 
 | Task | Completed |
 |------|-----------|
+| Better Auth Dash plugin setup + secret fix + env verification | 2026-07-21 |
 | .ai-system bootstrap and project documentation population | 2026-07-04 |
 | 19 HTML design system screens | 2026-07-04 |
 | Init Next.js 15 with TypeScript strict + Tailwind v4 | 2026-07-05 |

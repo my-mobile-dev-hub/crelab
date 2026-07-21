@@ -313,55 +313,33 @@ Testing, Provider Dashboard, Client Dashboard, Phase 2 features (messaging, noti
 
 ---
 
-## Session 8 — 2026-07-12 (Payment System Expansion)
+## Session 8 — 2026-07-21 (Execute Feature — Better Auth Dash + Supabase Setup)
 
 **Completed:**
-Full payment system expansion implementing Wallet, Milestone Payments, and Direct/One-Off payment modes:
+Fixed Better Auth Dash ownership verification failure blocking sign-up flow:
 
-1. **Types & Enums** — Added IWallet, IWalletTransaction, IBookingMilestone interfaces, WalletTransactionType/MilestoneStatus/PaymentMode enums, custom error classes (InsufficientBalanceError, MilestoneAmountMismatchError, etc.)
-2. **Database Schema** — Added wallets, wallet_transactions, booking_milestones, processed_webhook_events tables; added payment_mode column to bookings; added all relations; generated migration (0002_breezy_tinkerer.sql) + RLS policies (0003_wallet_rls.sql)
-3. **Config** — Added milestonePayments and wallet config blocks to DEFAULT_CONFIG with sensible Nigerian kobo defaults
-4. **WalletService** — Full implementation: getOrCreate, getBalance, topUpFromCard/Bank (with idempotency), debitForBooking, creditFromEscrowRelease, requestWithdrawal (with Paystack transfer + refund on failure), debitForMilestone, creditMilestoneRelease, debitForDirectPayment
-5. **MilestoneService** — Full implementation: createMilestones (2-5 validation, amount matching), fundMilestone (sequential funding, wallet debit), submitMilestone, approveMilestone, autoApproveMilestone (cron target), disputeMilestone
-6. **Paystack** — Added initiateTransfer(), createDedicatedVirtualAccount(), getTransferRecipient() to lib/paystack.ts
-7. **Webhook Handler** — Extended to handle charge.success (WALLET_TOPUP/BOOKING_PAYMENT), transfer.success/failed/reversed, dedicatedaccount.assign.success with idempotency via processed_webhook_events
-8. **API Routes** — /api/wallet/topup/card, /api/wallet/topup/bank, /api/wallet/balance, /api/wallet/withdraw, /api/wallet/transactions (paginated, filterable)
-9. **Milestones API** — /api/milestones (create, fund, submit, approve, dispute via action parameter)
-10. **Cron** — /api/cron/milestones (auto-approves expired milestones); updated vercel.json crons
-11. **UI Components** — WalletBalanceCard, TopUpModal (card/bank tabs), WithdrawModal, MilestoneBuilder (2-5 milestone definition with running total validation), MilestoneTimeline (vertical timeline with progress indicator and CTAs)
-12. **Wallet Page** — /wallet with balance display, transaction history with type filtering, top-up/withdraw modals
-13. **Booking Detail** — Added MilestoneTimeline for MILESTONE mode bookings, "Add Payment" button for DIRECT mode, payment mode badge
-14. **Middleware** — Added /wallet to protected routes
+1. **Installed `@better-auth/infra`** — npm package for the Dash dashboard plugin
+2. **Added `dash()` plugin** — `lib/auth.ts` now imports and registers `dash()` from `@better-auth/infra`
+3. **Fixed `BETTER_AUTH_SECRET`** — Replaced placeholder `your-secret-here` with a generated 64-char hex secret in `.env`
+4. **Updated `.env.example`** — Added `BETTER_AUTH_API_KEY` to the template
+5. **Verified env vars** — Supabase DATABASE_URL, project URL, and anon key are correctly configured for the `ewbacelepotfhdvqwenr` project
 
-**Files Modified/Created:**
-- `types/index.ts` — new enums + interfaces
-- `lib/errors.ts` — NEW: custom error classes
-- `drizzle/schema.ts` — new tables + relations + enums
-- `drizzle/migrations/0002_breezy_tinkerer.sql` — NEW: payment expansion migration
-- `drizzle/migrations/0003_wallet_rls.sql` — NEW: RLS policies
-- `config/platform.config.ts` — milestonePayments + wallet config
-- `services/WalletService.ts` — NEW: wallet service
-- `services/MilestoneService.ts` — NEW: milestone service
-- `services/BookingService.ts` — added paymentMode mapping
-- `services/MockDataService.ts` — added paymentMode to mock data
-- `lib/paystack.ts` — added initiateTransfer, createDVA, getTransferRecipient
-- `app/api/webhooks/paystack/route.ts` — extended event handlers
-- `app/api/wallet/` — 5 new API routes
-- `app/api/milestones/route.ts` — NEW: milestones API
-- `app/api/cron/milestones/route.ts` — NEW: milestones cron
-- `app/(auth)/wallet/page.tsx` + `WalletClient.tsx` — NEW: wallet page
-- `components/wallet/WalletBalanceCard.tsx` — NEW
-- `components/wallet/TopUpModal.tsx` — NEW
-- `components/wallet/WithdrawModal.tsx` — NEW
-- `components/booking/MilestoneBuilder.tsx` — NEW
-- `components/booking/MilestoneTimeline.tsx` — NEW
-- `app/(auth)/bookings/[id]/BookingDetailClient.tsx` — updated for all payment modes
-- `app/(auth)/bookings/[id]/page.tsx` — added paymentMode mapping
-- `components/ui/index.ts` — exported ClTabs sub-components
-- `middleware.ts` — added /wallet to protected routes
-- `vercel.json` — added milestones cron schedule
+**Files Modified:**
+- `lib/auth.ts` — Added dash plugin import + registration
+- `.env` — Replaced placeholder BETTER_AUTH_SECRET with real secret
+- `.env.example` — Added BETTER_AUTH_API_KEY to example
+- `package.json` — Added `@better-auth/infra` dependency
+- `package-lock.json` — Updated lockfile
 
-**Build Status:** ✅ Production build passes (44 pages, middleware, zero errors). TypeScript compiles with zero errors. ESLint passes with zero errors.
+**Build Status:** ✅ TypeScript compiles with zero errors. Dash plugin properly types.
 
 **Next Task:**
-Testing all payment flows, provider/client dashboards, messaging, notifications.**
+Deploy to Vercel so Dash ownership verification passes. Run `drizzle-kit push` to sync migrations.
+
+**Assumptions Made:**
+- The `BETTER_AUTH_API_KEY=ba_mxn6kkcjkrzhvoi2xx4adeo1uv5f7jvu` in `.env` is the correct key for the Dash dashboard (provided by the user)
+- The Supabase project `ewbacelepotfhdvqwenr` is the correct project with RLS policies already configured via `drizzle/migrations/0002_rls.sql`
+
+**Notes / Blockers:**
+- Must redeploy to Vercel for Dash ownership verification to succeed — the plugin verifies against the deployed `baseURL`
+- `drizzle-kit push` should be run against the Supabase DB to ensure schema is in sync with migrations

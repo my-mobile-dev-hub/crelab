@@ -1,8 +1,8 @@
 # Dependency Graph
 
 > **Metadata**
-> - last-updated-by: update-ai-system
-> - last-verified-against-code: 2026-07-05 (OC-7 reconciliation)
+> - last-updated-by: execute-feature
+> - last-verified-against-code: 2026-07-21
 > - staleness-policy: auto-regenerable — can be derived from import analysis tools. Manual content only for conventions and rules that cannot be inferred from code.
 
 > **Overview:** Maps how modules depend on each other. Agents use this to understand the impact of changes.
@@ -73,6 +73,7 @@ Drizzle
 | postgres | PostgreSQL driver | lib/db.ts |
 | drizzle-orm | ORM, schema, relations | drizzle/, services/ |
 | better-auth | Authentication + plugins | lib/auth.ts |
+| @better-auth/infra | Dash dashboard plugin + sentinel security | lib/auth.ts |
 | @tanstack/react-query | Client data fetching | hooks/useAuth.ts, app/page.tsx |
 | framer-motion | Animation | components/ |
 | tailwindcss | Styling | app/, components/ |
