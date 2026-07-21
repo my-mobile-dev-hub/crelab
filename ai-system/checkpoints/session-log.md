@@ -343,3 +343,41 @@ Deploy to Vercel so Dash ownership verification passes. Run `drizzle-kit push` t
 **Notes / Blockers:**
 - Must redeploy to Vercel for Dash ownership verification to succeed — the plugin verifies against the deployed `baseURL`
 - `drizzle-kit push` should be run against the Supabase DB to ensure schema is in sync with migrations
+
+---
+
+## Session 9 — 2026-07-21 (Execute Feature — DB Schema Sync + Dashboard Verification Fix)
+
+**Completed:**
+Diagnosed and fixed the root cause of Dash ownership verification failure even after redeploy:
+
+1. **Root cause identified** — The Supabase database had no tables. All auth DB operations (sign-up/login) silently returned 500 errors. The Dash cloud could see the plugin endpoints but the 500 on sign-up caused the ownership flow to fail.
+2. **`drizzle.config.ts`** — Added `dbCredentials.url` so drizzle-kit can connect to Supabase
+3. **`drizzle-kit push`** — Synced Drizzle schema to Supabase. Now all 14 tables + enums + relations exist.
+4. **Verified auth flow** — `POST /api/auth/sign-up/email` now returns 200 with user object
+5. **Explicit `apiKey`** — Passed `BETTER_AUTH_API_KEY` explicitly to `dash({ apiKey: ... })` for reliability
+
+**Verified Deployed Endpoints:**
+- `GET /api/auth/get-session` → 200 (null) ✅
+- `POST /api/auth/sign-up/email` → 200 (user created) ✅
+- `GET /api/auth/dash/config` → 401 (plugin active) ✅
+- `GET /api/auth/dash/validate` → 401 (plugin active) ✅
+- `GET /api/explore` → 200 (mock data) ✅
+
+**Files Modified:**
+- `drizzle.config.ts` — Added `dbCredentials.url` for DB connectivity
+- `lib/auth.ts` — Explicit `apiKey` passed to `dash()` plugin
+- `ai-system/checkpoints/in-progress.md` — Updated with full diagnosis
+
+**Build Status:** ✅ TypeScript compiles with zero errors. DB schema synced to Supabase. All endpoints verified.
+
+**Next Task:**
+Ensure Vercel env vars include `BETTER_AUTH_API_KEY`, `BETTER_AUTH_SECRET`, and `DATABASE_URL`. Redeploy to Vercel. Check Better Auth Dash dashboard.
+
+**Assumptions Made:**
+- The `BETTER_AUTH_API_KEY` value in `.env` must also be set in Vercel's project environment variables — `.env` is not automatically deployed
+- The Supabase pooler URL works for drizzle-kit pushes (confirmed — push succeeded)
+
+**Notes / Blockers:**
+- After redeploying with env vars set, the Dash dashboard should show ownership verified
+- If still failing, check Vercel deployment logs for runtime errors

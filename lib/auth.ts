@@ -23,7 +23,9 @@ export const auth = betterAuth({
   },
   plugins: [
     phoneNumber(),
-    dash(),
+    dash({
+      apiKey: process.env.BETTER_AUTH_API_KEY,
+    }),
   ],
   user: {
     additionalFields: {
