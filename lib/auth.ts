@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db } from "@/lib/db";
 import { phoneNumber } from "better-auth/plugins";
+import { dash } from "@better-auth/infra";
 import * as schema from "@/drizzle/schema";
 
 export const auth = betterAuth({
@@ -22,6 +23,7 @@ export const auth = betterAuth({
   },
   plugins: [
     phoneNumber(),
+    dash(),
   ],
   user: {
     additionalFields: {

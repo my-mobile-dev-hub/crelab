@@ -34,6 +34,7 @@ async function getBookingDetail(id: string) {
     ...row.booking,
     status: row.booking.status as IBooking["status"],
     escrowState: row.booking.escrowState as IBooking["escrowState"],
+    paymentMode: (row.booking.paymentMode ?? "ESCROW") as IBooking["paymentMode"],
     serviceDate: row.booking.serviceDate?.toISOString() ?? null,
     releaseDeadline: row.booking.releaseDeadline?.toISOString() ?? null,
     createdAt: row.booking.createdAt.toISOString(),

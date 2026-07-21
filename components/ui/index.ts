@@ -6,5 +6,5 @@ export { ClSelect } from "./ClSelect";
 export { ClBadge } from "./ClBadge";
 export { ClDialog } from "./ClDialog";
 export { ClSheet } from "./ClSheet";
-export { ClTabs } from "./ClTabs";
+export { ClTabs, ClTabsList, ClTabsTrigger, ClTabsContent } from "./ClTabs";
 export { ClAvatar } from "./ClAvatar";

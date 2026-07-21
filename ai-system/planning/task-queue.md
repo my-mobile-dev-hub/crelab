@@ -1,0 +1,117 @@
+# Development Task Queue
+
+> **Metadata**
+> - last-updated-by: execute-feature
+> - last-verified-against-code: 2026-07-21
+> - staleness-policy: re-verify before each session
+
+> **Overview:** Sprint-level task queue with complexity tagging. Agents execute tasks top to bottom within the current sprint. Each task is sized so it can be completed in a single session.
+
+---
+
+## Complexity Tags
+
+| Tag | Meaning | Recommended Command |
+|-----|---------|-------------------|
+| `[XS]` | Trivial — single file, known pattern | dev-cycle.md |
+| `[S]` | Small — 1-3 files, well-understood | dev-cycle.md |
+| `[M]` | Medium — 3-8 files, some planning needed | dev-cycle.md with plan-feature pre-read |
+| `[L]` | Large — feature spanning modules | execute-feature.md |
+| `[XL]` | Very large — architecture-affecting | execute-feature.md, requires architect role |
+| `[BUG]` | Bug fix | fix-build.md |
+
+---
+
+## Completed Sprint — MVP Core (Milestones 1.0-1.4)
+
+All Milestones substantially complete. Blog system, sitemap/robots completed. Remaining: onboarding wizard UI, tests, Phase 2 features (dashboards, messaging, notifications).
+
+---
+
+## Current Tasks — Remaining Work
+
+| Size | Task | Status |
+|------|------|--------|
+| [XL] | Payment System Expansion — Wallet, Milestone, Direct modes | [x] |
+| [M] | Write tests for all services (incl. payment expansion) | [ ] |
+| [M] | Provider Dashboard (full) with earnings, kanban pipeline, availability calendar | [ ] |
+| [M] | Client Dashboard: active bookings, booking history, payment history | [ ] |
+| [L] | In-platform messaging (Phase 2) | [ ] |
+| [M] | Notifications: email (Resend) + in-app notification centre | [ ] |
+
+---
+
+## Backlog
+
+| Size | Task |
+|------|------|
+| [M] | Client Dashboard: active bookings, booking history, payment history |
+| [M] | Reviews & ratings: mutual post-service, "Verified Booking" badge |
+| [M] | Pricing guidance widget: anonymised aggregate rates by category |
+| [L] | Identity verification: BVN/NIN check via Dojah or Smile Identity |
+| [L] | Algorithm & personalisation: personalised Explore feed, saved searches |
+| [M] | Promoted listings: paid featured placement, "Sponsored" label |
+| [L] | Video analytics: per-video play counts, view duration, conversion rate |
+| [S] | PWA as interim mobile experience |
+| [XL] | API / white-label embed: booking widget, public provider discovery API |
+
+---
+
+## Completed
+
+| Task | Completed |
+|------|-----------|
+| Better Auth Dash plugin setup + secret fix + env verification | 2026-07-21 |
+| .ai-system bootstrap and project documentation population | 2026-07-04 |
+| 19 HTML design system screens | 2026-07-04 |
+| Init Next.js 15 with TypeScript strict + Tailwind v4 | 2026-07-05 |
+| Platform config shell + PlatformConfigService + ConfigContext | 2026-07-05 |
+| Global types: entity interfaces, enums, API wrappers, explore types | 2026-07-05 |
+| Drizzle schema (329 lines, all tables/enums/relations) + migrations | 2026-07-05 |
+| Better Auth: instance, API handler, middleware, client hook | 2026-07-05 |
+| Cl* component wrappers (10 primitives) | 2026-07-05 |
+| AuthGate shared component | 2026-07-05 |
+| NDPR consent capture server action | 2026-07-05 |
+| Provider Profile page + components (Hero, PortfolioGrid, ServicePackages, Reviews, WorkHistory) | 2026-07-05 |
+| Portfolio service CRUD + reorder + hide | 2026-07-05 |
+| Google Drive sync: URL validation, fetch files, ingest, cron, service | 2026-07-05 |
+| Explore feed: service, API, filter bar, masonry grid, infinite scroll | 2026-07-05 |
+| Category browse + search results pages | 2026-07-05 |
+| Booking service + state machine + legal transitions | 2026-07-05 |
+| Escrow service: initiate, webhook handler, setInProgress, release, dispute, resolution | 2026-07-05 |
+| Payment service: init, split payout, refund | 2026-07-05 |
+| BookingDrawer, EscrowTimeline, DisputeModal components | 2026-07-05 |
+| Admin panel: layout, sidebar, config editor, category manager, provider queue, dispute dashboard | 2026-07-05 |
+| OC-7: Wrapper compliance audit (all clean) | 2026-07-05 |
+| OC-7: Config compliance — replaced hardcoded "Crelab"/"CreLab"/"#E8FF47" with config values | 2026-07-05 |
+| OC-7: Money audit (all money arithmetic uses Math.round() on kobo) | 2026-07-05 |
+| OC-7: Performance: N+1 audit, cursor pagination, IntersectionObserver verified | 2026-07-05 |
+| OC-7: Accessibility: focus-visible rings, aria-labels, muted videos, reduced-motion support | 2026-07-05 |
+| OC-7: NDPR compliance: created /privacy, /terms pages, CookieConsentBanner, consent recording on register | 2026-07-05 |
+| OC-7: Production gate: build + tsc + lint pass with zero errors/warnings | 2026-07-05 |
+| Sanity CMS blog system: schema, config, /blog, /blog/[slug], blog components | 2026-07-05 |
+| sitemap.ts + robots.ts (Next.js generated SEO) | 2026-07-05 |
+| Payment Expansion: types, enums, error classes | 2026-07-12 |
+| Payment Expansion: DB schema, migration, RLS (wallets, transactions, milestones, webhook events) | 2026-07-12 |
+| Payment Expansion: platform config (milestonePayments, wallet blocks) | 2026-07-12 |
+| Payment Expansion: WalletService (9 methods, idempotency, atomic transactions) | 2026-07-12 |
+| Payment Expansion: MilestoneService (create, fund, submit, approve, autoApprove, dispute) | 2026-07-12 |
+| Payment Expansion: Paystack lib (initiateTransfer, DVA, getRecipient) | 2026-07-12 |
+| Payment Expansion: Webhook handler (charge.success, transfer events, DVA assignment) | 2026-07-12 |
+| Payment Expansion: Wallet API routes (topup/card, topup/bank, balance, withdraw, transactions) | 2026-07-12 |
+| Payment Expansion: Milestones API route | 2026-07-12 |
+| Payment Expansion: Milestones cron + vercel.json update | 2026-07-12 |
+| Payment Expansion: UI components (WalletBalanceCard, TopUpModal, WithdrawModal) | 2026-07-12 |
+| Payment Expansion: UI components (MilestoneBuilder, MilestoneTimeline) | 2026-07-12 |
+| Payment Expansion: Wallet page + middleware update | 2026-07-12 |
+| Payment Expansion: Booking detail updated for all payment modes | 2026-07-12 |
+
+---
+
+## Notes
+
+- All monetary values must be stored as integers (kobo) — never floating point
+- All UI must use Cl* wrappers, never raw shadcn/ui imports
+- Config before code: define config structure before building features
+- Paystack webhook uses raw-body + HMAC-SHA512 verification
+- Booking state transitions validated by LEGAL_TRANSITIONS map

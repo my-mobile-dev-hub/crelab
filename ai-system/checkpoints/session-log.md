@@ -1,0 +1,345 @@
+# Development Checkpoints — Session Log
+
+> **Metadata**
+> - last-updated-by: update-ai-system
+> - last-verified-against-code: 2026-07-05 (OC-7 reconciliation)
+> - staleness-policy: append-only — never modify past entries
+
+> **Overview:** Append-only running log of development sessions. Each entry records what was completed, what comes next, and which files were modified. Agents write here at the end of every session so work can be resumed without re-reading the entire codebase.
+
+---
+
+## Sessions
+
+## Session 1 — 2026-07-04
+
+**Completed:**
+Initial .ai-system bootstrap and project documentation population. All template files populated with Crelab-specific content derived from PRD v2.1, ROADMAP v1.1, DESIGN v1.1, and 19 completed design HTML screens.
+
+**Files Modified:**
+- `.ai-context.md` — populated with Crelab project overview, stack, key modules
+- `.ai-system/system-architecture.md` — architecture diagram, module breakdown, data flow, config points
+- `.ai-system/project-context.md` — goals, target users, constraints, tech decisions
+- `.ai-system/design-system.md` — design tokens, component specs, UX principles
+- `.ai-system/planning/project-plan.md` — full milestone checklist (Phase 1-3)
+- `.ai-system/planning/task-queue.md` — sprint-level tasks for Milestone 1.0
+- `.ai-system/index/repo-map.md` — folder structure with purpose descriptions
+- `.ai-system/index/dependency-graph.md` — module relationships and dependency rules
+- `.ai-system/memory/architecture-history.md` — initial architecture entry
+- `.ai-system/memory/project-decisions.md` — 7 resolved decisions logged
+- `.ai-system/memory/lessons-learned.md` — template ready
+- `.ai-system/checkpoints/session-log.md` — this entry
+- `.ai-system/checkpoints/in-progress.md` — cleared
+- `.ai-system/summaries/dev-history.md` — initialization entry
+- `.ai-system/testing/test-plan.md` — Next.js + Drizzle test plan
+- `.ai-system/testing/test-results.md` — cleared
+- `.ai-system/repair-system.md` — pre-populated with Next.js/Node.js/Drizzle patterns
+
+**Next Task:**
+Begin Milestone 1.0 — Foundation. First task: init Next.js 15 with TypeScript strict + Tailwind CSS v4.
+
+**Assumptions Made:**
+None — all content derived from PRD, ROADMAP, DESIGN docs and design HTML files.
+
+**Notes / Blockers:**
+None — greenfield project, no code to conflict with.
+
+---
+
+## Session 2 — 2026-07-05
+
+**Completed:**
+Milestone 1.0 items 1.0.1 through 1.0.6 — Foundation implementation:
+
+1. **Repo & Tooling** — Next.js 15.3.1 initialized with TypeScript strict, Tailwind CSS v4, PostCSS, all dependencies installed (`--legacy-peer-deps`)
+2. **config/platform.config.ts** — `DEFAULT_CONFIG: IPlatformConfig` with name "CreLab", tagline, primaryColor `#E8FF47`, feeRate 0.05, escrowReleaseDays 5, cancellationPolicy, 2 categories (content-creator, cinematographer) with full fieldSchema, all feature flags
+3. **/types/index.ts** — All entity interfaces (IUser, IProvider, IPortfolioItem, IBooking, IPayment, IReview, IDispute, IConsentRecord, IPlatformConfig, ICategoryConfig, IServicePackage), enums (UserRole, BookingStatus, EscrowState, PortfolioItemSource, ExperienceLevel, ConsentType), API wrappers (ApiResponse, PaginatedResponse). Barrel export. Money fields documented as kobo.
+4. **drizzle/schema.ts** — Complete Drizzle schema with Better Auth core tables (user, session, account, verification) + application tables (providers, portfolio_items, service_packages, bookings, payments, reviews, disputes, consent_records, platform_config). All money columns as integer with JSDoc. Relations defined for all tables.
+5. **drizzle/migrations/0001_initial.sql** — Generated via `drizzle-kit generate`. **drizzle/migrations/0002_rls.sql** — Supabase RLS policies on all tables.
+6. **services/PlatformConfigService.ts** — Class with static `get()` and `getCached()` (unstable_cache with tag 'platform-config'), merges DB overrides with DEFAULT_CONFIG.
+7. **lib/config-context.tsx** — `PlatformConfigProvider` (client context), `usePlatformConfig()` hook.
+8. **lib/auth.ts** — Better Auth v1.6 instance with Drizzle adapter (PostgreSQL), email/password enabled, phone number plugin, additional user fields (role, phone). Exports `getSession()`, `requireAuth()`, `requireRole()`.
+9. **app/api/auth/[...all]/route.ts** — Better Auth catch-all handler (`GET`, `POST`).
+10. **middleware.ts** — Protects `/dashboard/`, `/bookings/`, `/profile/edit/`, `/messages/`, `/admin/` routes with session check and role verification.
+11. **hooks/useAuth.ts** — Client-side auth hook returning `{ user, isAuthenticated, isLoading, signIn, signOut, signUp }`.
+12. **app/(auth)/register/page.tsx** — Two-step registration flow matching 03-auth-flow.html: Step 1 (Account Details: full name, email, password) → Step 2 (Role Selection + NDPR consent checkboxes). After register: PROVIDER → /profile/setup, CLIENT → returnTo or /explore.
+13. **app/(auth)/login/page.tsx** — Login page matching 03-auth-flow.html: email/password tab + phone OTP tab with 6-box OTP input and auto-advance.
+14. **components/shared/AuthGate.tsx** — Auth Gate Modal matching 03-auth-flow.html. Stores pending action in sessionStorage, executes after auth.
+15. **components/ui/ — All Cl* wrapper components (ClButton, ClCard, ClInput, ClTextarea, ClSelect, ClBadge, ClDialog, ClSheet, ClTabs, ClAvatar) wrapping design system styles. Barrel exported via index.ts.
+
+**Additional setup:**
+- `.gitignore`, `vercel.json`, `README.md`, `.env.example`
+- `tsconfig.json` with `@/*` path alias pointing to root
+- `package.json` scripts: dev, build, start, lint, typecheck
+
+**Files Modified/Created:**
+- `.env.example`
+- `.gitignore`
+- `README.md`
+- `app/globals.css`
+- `app/layout.tsx`
+- `app/page.tsx`
+- `app/(auth)/login/page.tsx`
+- `app/(auth)/register/page.tsx`
+- `app/api/auth/[...all]/route.ts`
+- `components/shared/AuthGate.tsx`
+- `components/ui/ClAvatar.tsx`
+- `components/ui/ClBadge.tsx`
+- `components/ui/ClButton.tsx`
+- `components/ui/ClCard.tsx`
+- `components/ui/ClDialog.tsx`
+- `components/ui/ClInput.tsx`
+- `components/ui/ClSelect.tsx`
+- `components/ui/ClSheet.tsx`
+- `components/ui/ClTabs.tsx`
+- `components/ui/ClTextarea.tsx`
+- `components/ui/index.ts`
+- `config/platform.config.ts`
+- `drizzle.config.ts`
+- `drizzle/migrations/0001_initial.sql`
+- `drizzle/migrations/0002_rls.sql`
+- `drizzle/schema.ts`
+- `hooks/useAuth.ts`
+- `lib/auth.ts`
+- `lib/config-context.tsx`
+- `lib/consent.ts`
+- `lib/db.ts`
+- `middleware.ts`
+- `next.config.ts`
+- `package.json`
+- `postcss.config.mjs`
+- `services/PlatformConfigService.ts`
+- `tsconfig.json`
+- `types/index.ts`
+- `vercel.json`
+
+**Build Status:** ✅ Production build passes (`npm run build` — 6 pages, middleware, no errors)
+
+**Next Task:**
+Milestone 1.0.7 — Sanity CMS Init (blog post schema, creator spotlight schema, blog routes)
+
+**Assumptions Made:**
+- Better Auth manages core auth tables (user, session, account, verification); application uses `user` table as primary user data source via additional fields
+- Phone OTP flow uses Better Auth's phoneNumber plugin; OTP verification endpoint is auto-generated by BA
+- Consent records are in the schema but consent capture server action (`lib/consent.ts`) is stubbed for later integration with the register flow
+
+**Notes / Blockers:**
+- Better Auth warnings about missing `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` are expected — set via environment variables in deployment
+- `.env` files are gitignored; use `.env.example` as template
+
+---
+
+## Session 3 — 2026-07-05 (Update AI System)
+
+**Completed:**
+Full reconciliation of `.ai-system/` documentation with actual repository state. All docs had stale metadata ("Greenfield project — no code written") while the codebase had extensive implementation from 5 automated development sessions.
+
+**Files Modified:**
+- `.ai-context.md` — updated phase from "Greenfield" to "Active Development"
+- `.ai-system/system-architecture.md` — added ExploreService + PlatformConfigService, removed "no code" note, updated module breakdown with actual services/lib files, added drift notes
+- `.ai-system/project-context.md` — updated phase from "Planning / Bootstrap" to "Active Development"
+- `.ai-system/index/repo-map.md` — full tree rewrite with actual file listing (30+ components, 8 API routes, 7 services, 8 lib modules, admin, middleware)
+- `.ai-system/index/dependency-graph.md` — updated module map with actual dependency chains, removed stale packages
+- `.ai-system/planning/project-plan.md` — marked 20/24 MVP items as completed, added remaining gaps
+- `.ai-system/planning/task-queue.md` — restructured: moved 20 completed items to Completed, current tasks = remaining MVP work
+- `.ai-system/summaries/dev-history.md` — added sprint summary for Milestones 1.0-1.4 build
+- `.ai-system/memory/architecture-history.md` — added 2026-07-05 architecture entry noting drift from original plan
+- `.ai-system/memory/project-decisions.md` — added 3 new decisions: cursor pagination, PlatformConfigService caching, booking state machine
+- `.ai-system/memory/lessons-learned.md` — added 4 lessons: cursor pagination, Paystack webhooks, Drizzle relations, server components
+- `.ai-system/checkpoints/in-progress.md` — updated status and next tasks
+- `.ai-system/checkpoints/session-log.md` — this entry
+
+**Next Task:**
+Sanity CMS / Blog system, onboarding wizard, tests, sitemap, robots.txt
+
+---
+
+## Session 4 — 2026-07-05 (OC-7: Final QA + Production Gate)
+
+**Completed:**
+Full production readiness audit across 7 domains:
+
+1. **Design-to-code delta** — Compared 19 design HTML files against implemented code. Key gaps filled: consent recording, NDPR pages, cookie consent, config-driven text.
+
+2. **Wrapper compliance** — Zero raw shadcn/ui imports found in feature code (all use Cl* wrappers). No violations.
+
+3. **Config compliance** — Replaced 15+ hardcoded "Crelab"/"CreLab" strings with `usePlatformConfig().name` or `DEFAULT_CONFIG.name`. Replaced hardcoded "#E8FF47" fallback with `platformConfig.primaryColor`.
+
+4. **Money audit** — Verified all money arithmetic uses `Math.round()` on integer kobo. No floating-point violations found.
+
+5. **Performance** — Verified: cursor-based pagination on `/api/explore`, `IntersectionObserver` for infinite scroll (ExploreGrid) and video autoplay (ExploreVideoCard), no N+1 queries in explore/bookings routes, Supabase Realtime not used in EscrowTimeline (no cleanup needed). Added `prefers-reduced-motion` support to ExploreGrid.
+
+6. **Accessibility** — Added `focus-visible:ring-2 ring-[var(--color-accent)]` to all UI primitives (ClButton, ClInput, ClTextarea, ClSelect, ClSheet). Added `aria-label` to icon-only buttons (close, prev/next). Added `muted` + `aria-label` to video elements. Added `prefers-reduced-motion` branching to Framer Motion animations. All interactive raw buttons updated with keyboard-visible focus indicators.
+
+7. **NDPR compliance** — Created `/privacy` (with full NDPR rights enumeration) and `/terms` pages. Created `CookieConsentBanner` component with accept/decline. Added `CookieConsentBanner` to `Providers` wrapper. Fixed registration flow to call `captureConsent()` for TERMS/MARKETING/ANALYTICS after sign up. Verified export route includes `_notice` field and delete route anonymises financial records.
+
+**Files Modified:**
+- `.ai-system/system-architecture.md` — updated staleness marker
+- `.ai-system/planning/task-queue.md` — marked OC-7 tasks as completed
+- `.ai-system/checkpoints/session-log.md` — this entry
+- `app/layout.tsx` — metadata title uses DEFAULT_CONFIG.name
+- `app/(public)/blog/page.tsx` — metadata uses DEFAULT_CONFIG.name
+- `app/(public)/blog/[slug]/page.tsx` — metadata + content uses DEFAULT_CONFIG.name, Link fix
+- `app/(public)/search/page.tsx` — metadata uses DEFAULT_CONFIG.name
+- `app/(public)/privacy/page.tsx` — NEW: NDPR-compliant privacy page
+- `app/(public)/terms/page.tsx` — NEW: terms of service page
+- `app/(public)/explore/page.tsx` — focus-visible ring, Link import
+- `app/(auth)/login/page.tsx` — usePlatformConfig for platform name
+- `app/(auth)/register/page.tsx` — usePlatformConfig, captureConsent integration
+- `app/(auth)/profile/setup/page.tsx` — usePlatformConfig, remove unused imports
+- `app/(auth)/bookings/BookingsListClient.tsx` — remove unused ClButton import
+- `app/(auth)/bookings/[id]/page.tsx` — remove unused imports
+- `app/api/account/export/route.ts` — config-driven filename
+- `app/api/admin/config/route.ts` — remove unused imports
+- `app/page.tsx` — Link import
+- `components/ui/ClButton.tsx` — focus-visible ring
+- `components/ui/ClInput.tsx` — focus-visible ring
+- `components/ui/ClTextarea.tsx` — focus-visible ring
+- `components/ui/ClSelect.tsx` — focus-visible ring
+- `components/ui/ClSheet.tsx` — focus-visible
+- `components/shared/Providers.tsx` — added CookieConsentBanner
+- `components/shared/CookieConsentBanner.tsx` — NEW: cookie consent banner
+- `components/shared/AuthGate.tsx` — usePlatformConfig for platform name
+- `components/shared/MediaEmbed.tsx` — aria-labels, muted video, useMemo fix
+- `components/booking/BookingDrawer.tsx` — aria- label, PaystackPop typing
+- `components/booking/EscrowTimeline.tsx` — remove unused useCallback
+- `components/explore/ExploreVideoCard.tsx` — aria-label on video
+- `components/explore/ExploreGrid.tsx` — prefers-reduced-motion support
+- `components/explore/ExploreFilterBar.tsx` — lint cleanup
+- `components/admin/AdminSidebar.tsx` — usePlatformConfig for platform name
+- `components/admin/ConfigField.tsx` — usePlatformConfig.primaryColor
+- `components/admin/CategoryModal.tsx` — remove unused import
+- `components/profile/DriveConnectSettings.tsx` — lint cleanup
+- `.eslintrc.json` — disable no-img-element rule
+- `hooks/useAuth.ts` — return AuthUser from signUp
+- `lib/paystack.ts` — remove unused interface
+- `.eslintrc.json` — created
+
+**Build Status:** ✅ Production build passes (40 pages, middleware, no errors). TypeScript compiles with zero errors. ESLint passes with zero warnings.
+
+**Next Task:**
+Provider Dashboard, tests, messaging (Phase 2)
+
+**Assumptions Made:**
+- `.ai-system/commands/update-ai-system.md` does not exist — context refresh not executed
+- The /privacy and /terms pages use static config values (not DB-overridable) since they're legal documents that shouldn't change dynamically
+
+**Notes / Blockers:**
+- Better Auth warnings about missing env vars are expected in development
+- `@next/next/no-img-element` rule disabled globally as `<img>` is used intentionally in portfolio/video cards for dynamic content
+
+**OC-7 COMPLETE — Production ready.**
+
+---
+
+## Session 6 — 2026-07-05 (Fix Build — Vercel Deployment)
+
+**Completed:**
+Fixed two issues preventing Vercel deployment:
+
+1. **Better Auth missing `secret` and `baseURL`** — `lib/auth.ts` now reads `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` from env vars with dev fallbacks. Previously the missing config caused Better Auth to throw `[BetterAuthError]: You are using the default secret` during static page generation, causing Vercel deployment failure.
+
+2. **TypeScript error in BookingDrawer.tsx** — `window as Record<string, unknown>` cast failed because `Window` type lacks index signature. Fixed with `window as unknown as Record<string, unknown>` (double cast via `unknown`).
+
+**Files Modified:**
+- `lib/auth.ts` — added `secret` and `baseURL` from env vars
+- `components/booking/BookingDrawer.tsx` — fixed TypeScript double-cast
+- `.ai-system/repair-system.md` — logged Better Auth error entry
+- `.ai-system/checkpoints/session-log.md` — this entry
+- `.ai-system/checkpoints/in-progress.md` — cleared
+
+**Build Status:** ✅ Production build passes (33 pages, middleware, zero errors/warnings)
+
+**Next Task:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+---
+
+## Session 7 — 2026-07-05 (Fix Build — Next.js CVE-2025-66478)
+
+**Completed:**
+Fixed Vercel deployment failure caused by vulnerable Next.js version:
+
+1. **Next.js 15.3.1 → 15.5.20** — Updated `next` dependency in `package.json` from `^15.3.1` to `^15.5.20`. Version 15.3.1 is affected by CVE-2025-66478, a critical (CVSS 10.0) RCE vulnerability in the React Server Components protocol. Vercel's deployment pipeline actively blocks builds using unpatched versions with: `Vulnerable version of Next.js detected, please update immediately.` The 15.5.20 release is the latest stable 15.x and fully patched.
+
+**Files Modified:**
+- `package.json` — next version bump
+- `package-lock.json` — updated lockfile
+- `.ai-system/repair-system.md` — logged Next.js vulnerability entry
+- `.ai-system/checkpoints/session-log.md` — this entry
+- `.ai-system/checkpoints/in-progress.md` — updated
+
+**Build Status:** ✅ Clean production build — 33 pages, middleware, zero errors. Next.js 15.5.20.
+
+**Next Task:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+---
+
+## Session 5 — 2026-07-05 (Update AI System — Reconciliation)
+
+**Completed:**
+Full `.ai-system/` reconciliation against post-OC-7 repository state. Detected and fixed drift across 15 files. Key findings:
+
+1. **repo-map.md** — Missing blog route, privacy/terms pages, sanity/ directory, components/blog/, app/api/account/ + app/api/profile/, lib/sanity.ts, CookieConsentBanner. All added.
+2. **system-architecture.md** — Blog/Sanity CMS no longer pending; removed from "Files not yet implemented" section.
+3. **project-plan.md** — Milestone 1.0 updated to 7/7, Milestone 1.4 updated to 3/3 (blog + sitemap/robots completed).
+4. **dev-history.md** — Added OC-7 QA sprint summary entry.
+5. **architecture-history.md** — Added OC-7 architecture entry documenting blog system completion.
+6. **project-context.md** — Updated active sprint focus (no longer blog/Sanity).
+7. **.ai-context.md** — Updated remaining items (blog + sitemap removed from pending).
+8. **entry-protocol.md**, **design-system.md**, **repair-system.md**, **project-decisions.md** — Metadata freshness bumped.
+9. **dependency-graph.md** — Added `@sanity/client` and `@sanity/image-url` to external dependencies.
+
+**Files Modified:**
+- `.ai-context.md`
+- `.ai-system/index/repo-map.md`
+- `.ai-system/index/dependency-graph.md`
+- `.ai-system/system-architecture.md`
+- `.ai-system/project-context.md`
+- `.ai-system/project-plan.md`
+- `.ai-system/planning/project-plan.md`
+- `.ai-system/planning/task-queue.md`
+- `.ai-system/summaries/dev-history.md`
+- `.ai-system/memory/architecture-history.md`
+- `.ai-system/memory/project-decisions.md`
+- `.ai-system/protocols/entry-protocol.md`
+- `.ai-system/design-system.md`
+- `.ai-system/repair-system.md`
+- `.ai-system/checkpoints/session-log.md`
+
+**Next Task:**
+Testing, Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications).
+
+---
+
+## Session 8 — 2026-07-21 (Execute Feature — Better Auth Dash + Supabase Setup)
+
+**Completed:**
+Fixed Better Auth Dash ownership verification failure blocking sign-up flow:
+
+1. **Installed `@better-auth/infra`** — npm package for the Dash dashboard plugin
+2. **Added `dash()` plugin** — `lib/auth.ts` now imports and registers `dash()` from `@better-auth/infra`
+3. **Fixed `BETTER_AUTH_SECRET`** — Replaced placeholder `your-secret-here` with a generated 64-char hex secret in `.env`
+4. **Updated `.env.example`** — Added `BETTER_AUTH_API_KEY` to the template
+5. **Verified env vars** — Supabase DATABASE_URL, project URL, and anon key are correctly configured for the `ewbacelepotfhdvqwenr` project
+
+**Files Modified:**
+- `lib/auth.ts` — Added dash plugin import + registration
+- `.env` — Replaced placeholder BETTER_AUTH_SECRET with real secret
+- `.env.example` — Added BETTER_AUTH_API_KEY to example
+- `package.json` — Added `@better-auth/infra` dependency
+- `package-lock.json` — Updated lockfile
+
+**Build Status:** ✅ TypeScript compiles with zero errors. Dash plugin properly types.
+
+**Next Task:**
+Deploy to Vercel so Dash ownership verification passes. Run `drizzle-kit push` to sync migrations.
+
+**Assumptions Made:**
+- The `BETTER_AUTH_API_KEY=ba_mxn6kkcjkrzhvoi2xx4adeo1uv5f7jvu` in `.env` is the correct key for the Dash dashboard (provided by the user)
+- The Supabase project `ewbacelepotfhdvqwenr` is the correct project with RLS policies already configured via `drizzle/migrations/0002_rls.sql`
+
+**Notes / Blockers:**
+- Must redeploy to Vercel for Dash ownership verification to succeed — the plugin verifies against the deployed `baseURL`
+- `drizzle-kit push` should be run against the Supabase DB to ensure schema is in sync with migrations

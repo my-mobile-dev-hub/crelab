@@ -10,6 +10,20 @@ export const DEFAULT_CONFIG: IPlatformConfig = {
     fullRefundThresholdHours: 48,
     lateCancellationHoldPercent: 50,
   },
+  milestonePayments: {
+    enabled: true,
+    minBookingAmountKobo: 10000000,
+    maxMilestones: 5,
+    minMilestones: 2,
+    minMilestoneAmountKobo: 500000,
+    reviewWindowDays: 8,
+  },
+  wallet: {
+    enabled: true,
+    minTopUpKobo: 100000,
+    minWithdrawalKobo: 100000,
+    maxDvaAccounts: 1000,
+  },
   categories: [
     {
       slug: "content-creator",

@@ -15,6 +15,7 @@ const protectedPrefixes = [
   "/profile/edit",
   "/profile/setup",
   "/messages",
+  "/wallet",
 ];
 
 export default async function middleware(req: NextRequest) {
