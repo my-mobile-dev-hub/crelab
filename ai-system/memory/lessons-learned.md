@@ -95,3 +95,19 @@
 
 **Supersedes:** None
 **Superseded by:** None
+
+## Dash Ownership Verification — DB Schema Must Exist
+
+**Context:** Even after installing the Dash plugin and setting env vars, ownership verification still failed. The sign-up endpoint was returning 500 errors.
+
+**What We Learned:**
+1. An empty Supabase database (no tables applied) causes all auth DB operations to fail silently with 500
+2. The 500 errors prevent Dash ownership verification from completing — the cloud service can't confirm the server works
+3. `drizzle-kit push` syncs the schema directly without needing migration journal alignment
+4. The `drizzle.config.ts` must have `dbCredentials.url` set (or `DATABASE_URL` env var) for drizzle-kit to connect
+5. After pushing schema, verify by hitting `POST /api/auth/sign-up/email` — should return 200, not 500
+
+**Apply When:** Setting up a new Supabase project or troubleshooting 500 errors on auth endpoints.
+
+**Supersedes:** None
+**Superseded by:** None

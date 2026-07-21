@@ -114,4 +114,28 @@ Fixed Better Auth Dash ownership verification failure. Installed `@better-auth/i
 **Build Status:** ✅ TypeScript compiles with zero errors.
 
 **Next Sprint Focus:**
-Deploy to Vercel, run `drizzle-kit push` for DB sync, then continue with Provider Dashboard, Client Dashboard, Phase 2 features.
+Deploy to Vercel with all env vars set, then continue with Provider Dashboard, Client Dashboard, Phase 2 features.
+
+---
+
+## 2026-07-21 — DB Schema Sync + Dash Root Cause Fix
+
+**Summary:**
+Found the real root cause of Dash ownership verification failure: the Supabase database had no tables applied. All auth DB operations returned 500 errors. Ran `drizzle-kit push` to sync the schema, fixing both the sign-up flow and the Dash ownership check. Also updated `drizzle.config.ts` with DB credentials and passed `apiKey` explicitly to `dash()`.
+
+**Completed:**
+- Root cause diagnosis: empty Supabase DB causing 500s on auth endpoints
+- `drizzle.config.ts` — added `dbCredentials.url` for drizzle-kit connectivity
+- `drizzle-kit push` — synced all 14 tables + enums + relations to Supabase
+- Verified auth sign-up works on deployed Vercel app
+- Auth endpoints all confirmed working via HTTP requests
+
+**Key Changes:**
+- `drizzle.config.ts` — added dbCredentials
+- `lib/auth.ts` — explicit apiKey passed to dash()
+- DB schema now applied to Supabase project `ewbacelepotfhdvqwenr`
+
+**Build Status:** ✅ TypeScript compiles with zero errors. DB synced. All endpoints verified.
+
+**Next Sprint Focus:**
+Set all env vars in Vercel dashboard (`BETTER_AUTH_API_KEY`, `BETTER_AUTH_SECRET`, `DATABASE_URL`), redeploy, verify Dash ownership, then continue with Provider Dashboard, Client Dashboard, Phase 2 features.
