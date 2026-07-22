@@ -1,8 +1,8 @@
 # Development Task Queue
 
 > **Metadata**
-> - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-updated-by: update-ai-system
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: re-verify before each session
 
 > **Overview:** Sprint-level task queue with complexity tagging. Agents execute tasks top to bottom within the current sprint. Each task is sized so it can be completed in a single session.
@@ -33,11 +33,17 @@ All Milestones substantially complete. Blog system, sitemap/robots completed. Re
 | Size | Task | Status |
 |------|------|--------|
 | [XL] | Payment System Expansion — Wallet, Milestone, Direct modes | [x] |
+| [S] | Google OAuth (Better Auth social provider) + sign-in UI | [x] |
+| [S] | Paystack env vars + production config | [x] |
+| [S] | Light theme design system documentation | [x] |
+| [S] | Logo & icon integration (config-driven, favicon, navbars, landing, auth pages) | [x] |
+| [S] | Rename project to "Crellab" in config | [x] |
 | [M] | Write tests for all services (incl. payment expansion) | [ ] |
 | [M] | Provider Dashboard (full) with earnings, kanban pipeline, availability calendar | [ ] |
 | [M] | Client Dashboard: active bookings, booking history, payment history | [ ] |
 | [L] | In-platform messaging (Phase 2) | [ ] |
 | [M] | Notifications: email (Resend) + in-app notification centre | [ ] |
+| [M] | Provider Onboarding Wizard UI | [ ] |
 
 ---
 
@@ -61,9 +67,12 @@ All Milestones substantially complete. Blog system, sitemap/robots completed. Re
 
 | Task | Completed |
 |------|-----------|
+| DB seed system (scripts/seed.ts, scripts/seed-rollback.ts) — working auth passwords via Better Auth API | 2026-07-22 |
+| drizzle-kit push: schema synced to Supabase (14 tables, enums, relations) | 2026-07-21 |
+| Better Auth Dash: root cause fix (empty DB) + `drizzle.config.ts` + explicit apiKey | 2026-07-21 |
 | Better Auth Dash plugin setup + secret fix + env verification | 2026-07-21 |
 | .ai-system bootstrap and project documentation population | 2026-07-04 |
-| 19 HTML design system screens | 2026-07-04 |
+| 20 HTML design system screens | 2026-07-04 |
 | Init Next.js 15 with TypeScript strict + Tailwind v4 | 2026-07-05 |
 | Platform config shell + PlatformConfigService + ConfigContext | 2026-07-05 |
 | Global types: entity interfaces, enums, API wrappers, explore types | 2026-07-05 |

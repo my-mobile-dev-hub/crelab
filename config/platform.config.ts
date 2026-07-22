@@ -1,9 +1,11 @@
 import type { IPlatformConfig } from "@/types";
 
 export const DEFAULT_CONFIG: IPlatformConfig = {
-  name: "CreLab",
+  name: "Crellab",
   tagline: "Get hired for your creativity, not your follower count.",
   primaryColor: "#E8FF47",
+  logoPath: "/primary-logo.png",
+  iconPath: "/icon.png",
   feeRate: 0.05,
   escrowReleaseDays: 5,
   cancellationPolicy: {

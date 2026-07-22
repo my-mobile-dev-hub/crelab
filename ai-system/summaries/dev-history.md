@@ -1,8 +1,8 @@
 # Development History
 
 > **Metadata**
-> - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-updated-by: update-ai-system
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: historical entries do not go stale
 
 > **Overview:** Chronological log of completed development work. Each sprint ends with a summary entry. Agents add entries after completing tasks.
@@ -139,3 +139,86 @@ Found the real root cause of Dash ownership verification failure: the Supabase d
 
 **Next Sprint Focus:**
 Set all env vars in Vercel dashboard (`BETTER_AUTH_API_KEY`, `BETTER_AUTH_SECRET`, `DATABASE_URL`), redeploy, verify Dash ownership, then continue with Provider Dashboard, Client Dashboard, Phase 2 features.
+
+---
+
+## 2026-07-22 — DB Seed System + Working Auth Passwords
+
+**Summary:**
+Created a comprehensive database seeding system for the Crelab prototype with reproducible, working authentication. The initial approach used bcryptjs pre-hashing but Better Auth's native bcrypt verification rejected those hashes. Rewrote user creation to call `POST /api/auth/sign-up/email` on the Vercel deployment, capturing the Better Auth-generated user IDs and using those as FK targets throughout the seed data. Added retry-with-backoff for Vercel's rate limiter (429s). Rollback deletes all rows in FK-safe reverse order with a `_seed_version` marker for idempotency.
+
+**Completed:**
+- `scripts/seed.ts` — Creates 10 users via Better Auth API (admin, 5 providers, 4 clients), updates roles/phone numbers in DB, inserts 5 provider profiles, 13 service packages, 14 portfolio items, 8 bookings (various states), 5 payments, 2 reviews, 1 dispute, 9 wallets, 10 wallet transactions, 30 consent records. Seed marker written to platform_config for re-run protection.
+- `scripts/seed-rollback.ts` — Deletes all seed data in reverse FK dependency order. `--force` flag for partial/no-marker states.
+- `package.json` — Added `db:seed` and `db:seed:rollback` scripts with tsx.
+- Verified: all 3 roles (ADMIN, PROVIDER, CLIENT) can log in with `password123` — returns valid tokens.
+
+**Key Changes:**
+- `scripts/seed.ts` — 275 lines, user creation via HTTP to Better Auth sign-up endpoint (not pre-hashing)
+- `scripts/seed-rollback.ts` — 87 lines, FK-safe cascade deletion
+- `scripts/_test-bcrypt.mjs` — Scratch file for bcryptjs testing (can be removed)
+
+**Key Insight:**
+Better Auth's native password verification does not accept bcryptjs `$2b$` hashes even though they are standard format. Users must be created through Better Auth's own `signUp` flow (either HTTP API or server-side `auth.api.signUp`) for login to work. Direct DB inserts with pre-computed hashes create user records that exist but cannot authenticate.
+
+**Build Status:** ✅ Seed creates 100+ rows. Login verified for all roles.
+
+**Next Sprint Focus:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+---
+
+## 2026-07-22 — Paystack Configuration + Google OAuth + Light Theme Docs
+
+**Summary:**
+Production readiness pass: added Paystack secret/public key env vars, wired Google OAuth via Better Auth social providers with sign-in button on login page, added error handling to the auth hook to prevent infinite loading states, and documented the light theme system in the design system docs. The `.env.example` was also updated to include all missing environment variables across Paystack, Google OAuth, Cloudinary, Sanity CMS, and Google Drive.
+
+**Completed:**
+- Paystack `PAYSTACK_SECRET_KEY` and `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` added to `.env` and `.env.example`
+- Google OAuth added to `lib/auth.ts` via `socialProviders.google` with env var fallback
+- Google sign-in button added to login page with "or continue with email/phone" divider
+- `useAuth` hook extended with `signInWithGoogle()` and error catching on `getSession()` to prevent infinite loading
+- `design-system.md` updated with full `.light` palette and theme system docs (System/Light/Dark modes, ThemeToggler, ThemeContext)
+- `.env.example` completed with all service env vars (Paystack, Google, Cloudinary, Sanity, Drive, app URL)
+- `repo-map.md` updated with team, wallet, bug-report, forgot-password, theme-context, and missing services
+- `system-architecture.md` service layer diagram updated with WalletService, MilestoneService, MockDataService
+
+**Key Changes:**
+- `.env` — added `PAYSTACK_SECRET_KEY`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- `lib/auth.ts` — added `socialProviders.google` block
+- `hooks/useAuth.ts` — added `signInWithGoogle`, `.catch()` on getSession, error propagation on signIn/signUp
+- `app/(auth)/login/page.tsx` — added Google OAuth button + "or continue with" divider
+- `.ai-system/design-system.md` — added light theme color palette, theme system documentation
+- `.ai-system/index/repo-map.md` — added missing directories and components
+
+**Build Status:** ✅ TypeScript compiles with zero errors. Lint passes with zero errors.
+
+**Next Sprint Focus:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests). After deploying, set all env vars in Vercel project dashboard and trigger fresh deployment.
+
+---
+
+## 2026-07-22 — Logo Integration + Crellab Branding
+
+**Summary:**
+Integrated brand assets (icon + full logo) into the application using a config-driven approach. Added `logoPath` and `iconPath` fields to `IPlatformConfig` so both are single-source-of-truth config values. The icon is used for favicon, mobile navbars, auth pages, and compact contexts; the full logo is used for expanded desktop navbars, the landing page hero section, and the footer. Replaced all placeholder text-based "CreLab" logos (colored squares) across the app with the actual image assets. Renamed the platform from "CreLab" to "Crellab" for SEO/uniqueness.
+
+**Completed:**
+- Added `logoPath` / `iconPath` to config type + defaults → single source of truth for brand assets
+- Favicon + Apple touch icon via `app/layout.tsx` metadata
+- Desktop navbar: `primary-logo.png`; Mobile navbar + overlay: `icon.png`
+- Landing hero: full logo above tagline
+- Auth pages (login, register, forgot-password): icon + name
+- Footer: full logo replacing text heading
+- Admin sidebar: icon replacing colored square
+- Sanity CMS title: "CreLab" → "Crellab"
+- Branding documented in design system: "Logos & Branding" section
+
+**Key Changes:**
+- `types/index.ts` — `IPlatformConfig.logoPath`, `IPlatformConfig.iconPath`
+- `config/platform.config.ts` — `name: "Crellab"`, `logoPath: "/primary-logo.png"`, `iconPath: "/icon.png"`
+- `app/layout.tsx` — favicon metadata using config value
+- `components/shared/Navbar.tsx` — config-driven logo/icon images
+- All auth pages — icon images instead of placeholder colored squares
+
+**Build Status:** ✅ TypeScript compiles with zero errors. Lint passes (pre-existing warnings only).

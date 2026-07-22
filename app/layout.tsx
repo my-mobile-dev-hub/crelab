@@ -12,7 +12,11 @@ import type { IPlatformConfig } from "@/types";
 export const metadata: Metadata = {
   title: DEFAULT_CONFIG.name,
   description:
-    "A dark, cinematic marketplace where video is the first thing you see and quality speaks louder than follower count.",
+    "A cinematic marketplace where video is the first thing you see and quality speaks louder than follower count.",
+  icons: {
+    icon: DEFAULT_CONFIG.iconPath,
+    apple: DEFAULT_CONFIG.iconPath,
+  },
 };
 
 export default async function RootLayout({

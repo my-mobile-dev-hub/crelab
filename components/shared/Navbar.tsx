@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { usePlatformConfig } from "@/lib/config-context";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,7 +15,7 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { name, features } = usePlatformConfig();
+  const { name, logoPath, iconPath, features } = usePlatformConfig();
   const { isAuthenticated } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -50,10 +51,23 @@ export function Navbar() {
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between px-6">
         <Link
           href="/"
-          className="flex items-center gap-[10px] font-[family-name:var(--font-display)] text-[1.25rem] font-extrabold text-[var(--color-text-primary)] no-underline"
+          className="flex items-center gap-[10px] no-underline"
         >
-          <span className="block h-3 w-3 rotate-45 bg-[var(--color-accent)]" />
-          {name}
+          <Image
+            src={iconPath}
+            alt={name}
+            width={28}
+            height={28}
+            className="block sm:hidden"
+          />
+          <Image
+            src={logoPath}
+            alt={name}
+            width={120}
+            height={32}
+            className="hidden sm:block h-8 w-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop nav */}
@@ -125,6 +139,13 @@ export function Navbar() {
             : "opacity-0 pointer-events-none"
         }`}
       >
+        <div className="absolute top-6 left-6 flex items-center gap-3">
+          <Image src={iconPath} alt={name} width={32} height={32} />
+          <span className="font-[family-name:var(--font-display)] text-lg font-extrabold text-[var(--color-text-primary)]">
+            {name}
+          </span>
+        </div>
+
         <button
           onClick={() => setMobileOpen(false)}
           className="absolute top-6 right-6 flex h-11 w-11 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-transparent text-[var(--color-text-primary)] text-2xl cursor-pointer"

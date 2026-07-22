@@ -2,7 +2,7 @@
 
 > **Metadata**
 > - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: auto-regenerable — can be derived from `tree` command. Manual content only where intent cannot be derived from structure.
 
 > **Overview:** Visual map of the Crelab project folder structure with purpose descriptions.
@@ -13,6 +13,7 @@
 
 ```
 crelab/
+├── .github/                 # GitHub Actions workflows
 ├── .ai-system/              # AI-assisted development governance
 ├── app/                     # Next.js 15 App Router
 │   ├── globals.css          # Global styles + CSS custom properties
@@ -23,16 +24,20 @@ crelab/
 │   ├── (public)/            # Guest-accessible routes
 │   │   ├── [category]/     # Category browse page
 │   │   ├── blog/           # Blog index + [slug] article pages
+│   │   ├── bug-report/     # Bug report form page
 │   │   ├── explore/        # Explore page
 │   │   ├── privacy/        # NDPR-compliant privacy policy
 │   │   ├── profile/[slug]/ # Provider public profile
 │   │   ├── search/         # Search results
+│   │   ├── team/           # Team members page (config-driven)
 │   │   └── terms/          # Terms of service
 │   ├── (auth)/              # Better Auth gated routes
 │   │   ├── bookings/       # Booking detail + list
-│   │   ├── login/          # Sign in page
+│   │   ├── forgot-password/ # Password reset page
+│   │   ├── login/          # Sign in page (email/password + phone/OTP + Google OAuth)
 │   │   ├── profile/        # Profile edit/setup
-│   │   └── register/       # Sign up page
+│   │   ├── register/       # Sign up page (multi-step)
+│   │   └── wallet/         # Wallet page (balance, topup, withdraw, transactions)
 │   ├── admin/               # ADMIN role only
 │   │   ├── page.tsx        # Dashboard
 │   │   ├── layout.tsx      # Admin layout + sidebar
@@ -44,10 +49,13 @@ crelab/
 │       ├── account/        # User account (consent, delete, export)
 │       ├── admin/          # Admin CRUD endpoints
 │       ├── auth/           # Better Auth handler
+│       ├── bug-report/     # Bug report submission
 │       ├── cron/           # Escrow cron endpoints
 │       ├── explore/        # Provider search/filter/sort
+│       ├── milestones/     # Milestone CRUD
 │       ├── portfolio/      # Portfolio CRUD
 │       ├── profile/        # Profile management (setup)
+│       ├── wallet/         # Wallet: topup (card + bank DVA), withdraw, balance, transactions
 │       └── webhooks/       # Paystack webhook handler
 ├── components/
 │   ├── ui/                  # Cl* wrappers around shadcn/ui
@@ -55,8 +63,9 @@ crelab/
 │   ├── profile/            # ProviderHero, PortfolioGrid, ServicePackages, etc.
 │   ├── booking/            # BookingDrawer, EscrowTimeline, DisputeModal
 │   ├── blog/               # ArticleBody, BlogCard, CreatorSpotlightEmbed, ToCSidebar
-│   ├── admin/              # AdminSidebar, CategoryModal, ConfigField
-│   └── shared/             # Providers, AuthGate, MediaEmbed, CookieConsentBanner
+│   ├── admin/              # AdminSidebar, CategoryModal, ConfigField, TeamMemberModal, BatchOperations
+│   ├── wallet/             # WalletBalanceCard, TopUpModal, WithdrawModal
+│   └── shared/             # Providers, AuthGate, MediaEmbed, CookieConsentBanner, ThemeToggler
 ├── sanity/                  # Sanity CMS config + schemas
 │   ├── sanity.config.ts     # Sanity project configuration
 │   └── schemas/             # Blog post + creator spotlight schemas
@@ -65,9 +74,12 @@ crelab/
 │   ├── DriveService.ts
 │   ├── EscrowService.ts
 │   ├── ExploreService.ts
+│   ├── MilestoneService.ts
+│   ├── MockDataService.ts
 │   ├── PaymentService.ts
 │   ├── PlatformConfigService.ts
-│   └── PortfolioService.ts
+│   ├── PortfolioService.ts
+│   └── WalletService.ts
 ├── types/                   # Global TypeScript interfaces
 │   ├── index.ts            # Barrel export + all entity/config/API types
 │   └── explore.ts          # IExploreCard, IExploreFilters, ExploreSort
@@ -81,16 +93,21 @@ crelab/
 │   ├── db.ts               # Drizzle + Supabase client
 │   ├── drive.ts            # Google Drive API helpers + validation
 │   ├── mux.ts              # Mux streaming (stub — not wired)
-│   ├── paystack.ts         # Init transaction, verify webhook, split, refund
+│   ├── paystack.ts         # Init transaction, verify webhook, split, refund, DVA, transfer
 │   ├── sanity.ts           # Sanity CMS client + helpers
+│   ├── theme-context.tsx   # Theme provider (System/Light/Dark) + useTheme hook
 │   └── toast.tsx           # Toast notification component
 ├── drizzle/
 │   ├── schema.ts           # Drizzle schema (single source of truth for DB shape)
 │   └── migrations/         # Generated SQL migrations
 ├── hooks/
 │   └── useAuth.ts          # Client-side auth hook (signIn, signOut, signUp)
+├── scripts/                 # Database seeding + utility scripts
+│   ├── seed.ts             # DB seed: creates users via Better Auth API + inserts all seed data
+│   ├── seed-rollback.ts    # Rollback: deletes all seed data in FK-safe reverse order
+│   └── _test-bcrypt.mjs    # Scratch: bcryptjs hash testing (can be removed)
 ├── middleware.ts            # Route protection (auth + admin gate)
-└── public/                 # Static assets
+└── public/                 # Static assets (icon.png, primary-logo.png)
 ```
 
 ---
@@ -113,8 +130,9 @@ crelab/
 | `types/` | Global TypeScript interfaces and enums — single source of truth | `index.ts`, `explore.ts` |
 | `config/` | Platform configuration with hardcoded fallback + DB override | `platform.config.ts` |
 | `lib/` | Third-party SDK wrappers + shared utilities | `auth.ts`, `db.ts`, `paystack.ts`, `sanity.ts`, `config-context.tsx`, `consent.ts` |
-| `drizzle/` | Database schema, migrations, drizzle-kit config | `schema.ts`, `migrations/` |
+| `drizzle/` | Database schema, migrations, drizzle-kit config | `schema.ts` (463 lines, 14 tables + 6 enums + relations), `migrations/` |
 | `hooks/` | Custom React hooks | `useAuth.ts` |
+| `scripts/` | DB seeding: creates users via Better Auth API, inserts seed data, rollback | `seed.ts`, `seed-rollback.ts` |
 
 ---
 
