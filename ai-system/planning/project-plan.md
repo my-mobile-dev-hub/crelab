@@ -2,7 +2,7 @@
 
 > **Metadata**
 > - last-updated-by: update-ai-system
-> - last-verified-against-code: 2026-07-05 (OC-7 reconciliation)
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: re-verify if project scope or phase changes
 
 > **Overview:** High-level feature checklist organized by development phase per ROADMAP.md. See `planning/task-queue.md` for granular, sprint-level tasks.
@@ -78,9 +78,11 @@
 
 - [x] .ai-system governance structure initialized with bootstrap-project
 - [x] Project documentation (PRD, ROADMAP, DESIGN) populated
-- [x] 19 HTML design system screens completed
+- [x] 20 HTML design system screens completed (incl. 20-team.html light-theme refinement)
 - [x] Milestone 1.0 Foundation — 7/7 items (Sanity CMS completed)
 - [x] Milestone 1.1 Provider Supply Side — 4/5 items (no onboarding wizard)
 - [x] Milestone 1.2 Discovery & Client Side — 3/3 items
 - [x] Milestone 1.3 Booking & Payment — 6/6 items
 - [x] Milestone 1.4 Admin & SEO — 3/3 items (admin panel, blog system, sitemap/robots)
+- [x] Better Auth Dash plugin + Supabase schema sync — DB tables applied, all auth endpoints verified
+- [x] DB Seed System — 10 users via Better Auth API (working passwords), 100+ seed records, rollback with FK-safe cascade

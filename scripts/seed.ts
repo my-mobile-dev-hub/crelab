@@ -41,10 +41,10 @@ const clientEmails = [
   "yetunde@crelab.test",
 ] as const;
 
-async function createUser(u: SeedUser): Promise<string> {
+async function createUser(u: SeedUser, attempt = 1): Promise<string> {
   const res = await fetch(`${BASE_URL}/api/auth/sign-up/email`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Origin": BASE_URL, "Referer": BASE_URL + "/" },
     body: JSON.stringify({ email: u.email, password: SEED_PASSWORD, name: u.name }),
   });
   if (!res.ok) {
@@ -56,6 +56,12 @@ async function createUser(u: SeedUser): Promise<string> {
       if (!uid) throw new Error(`User ${u.email} exists per API but not found in DB`);
       await db.update(s.user).set({ role: u.role, phoneNumber: u.phoneNumber, phoneNumberVerified: true, emailVerified: true }).where(sql`${s.user.id} = ${uid}`);
       return uid;
+    }
+    if (res.status === 429 && attempt <= 5) {
+      const backoff = Math.min(5000 * attempt, 30000);
+      console.log(`   Rate limited. Retrying in ${backoff / 1000}s (attempt ${attempt})...`);
+      await new Promise(r => setTimeout(r, backoff));
+      return createUser(u, attempt + 1);
     }
     throw new Error(`Sign-up failed for ${u.email}: ${res.status} ${body}`);
   }
@@ -75,6 +81,8 @@ async function main() {
     process.exit(0);
   }
 
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
   const now = new Date();
   const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000);
 
@@ -84,6 +92,7 @@ async function main() {
     const uid = await createUser(u);
     userIdByEmail[u.email] = uid;
     console.log(`   ${u.email} -> ${uid}`);
+    await delay(3000);
   }
 
   const now30 = daysAgo(30);

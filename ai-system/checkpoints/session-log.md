@@ -2,7 +2,7 @@
 
 > **Metadata**
 > - last-updated-by: update-ai-system
-> - last-verified-against-code: 2026-07-05 (OC-7 reconciliation)
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: append-only — never modify past entries
 
 > **Overview:** Append-only running log of development sessions. Each entry records what was completed, what comes next, and which files were modified. Agents write here at the end of every session so work can be resumed without re-reading the entire codebase.
@@ -381,3 +381,43 @@ Ensure Vercel env vars include `BETTER_AUTH_API_KEY`, `BETTER_AUTH_SECRET`, and 
 **Notes / Blockers:**
 - After redeploying with env vars set, the Dash dashboard should show ownership verified
 - If still failing, check Vercel deployment logs for runtime errors
+
+---
+
+## Session 10 — 2026-07-22 (DB Seed System)
+
+**Completed:**
+Created comprehensive database seeding system with working authentication:
+
+1. **`scripts/seed.ts`** — 275 lines. Creates 10 users via `POST /api/auth/sign-up/email` on the deployed Vercel app (so passwords are properly hashed by Better Auth). Captures returned user IDs and uses them as FK targets for all related records. Retry-with-backoff for Vercel 429 rate limiting (3s delay between users, exponential backoff up to 30s). Inserts: 5 provider profiles, 13 service packages, 14 portfolio items, 8 bookings (REQUESTED, ACCEPTED, HELD, IN_PROGRESS, RELEASED, DISPUTED, CANCELLED), 5 payments, 2 reviews, 1 dispute, 9 wallets, 10 wallet transactions, 30 consent records. Writes `_seed_version` marker for idempotency.
+
+2. **`scripts/seed-rollback.ts`** — 87 lines. Deletes all seed data in reverse FK dependency order. Checks for `_seed_version` marker in `platform_config`. Supports `--force` flag for partial/no-marker states.
+
+3. **Fixed pre-hashing issue** — Initial approach used bcryptjs to pre-hash passwords. Login always returned 401 even though hashes were standard `$2b$10$` format. Root cause: Better Auth's native bcrypt verification rejects bcryptjs hashes. Solution: create users through Better Auth's signUp flow.
+
+4. **Verified login** — All 3 roles confirmed working:
+   - ADMIN: admin@crelab.test / password123 → token + `role: "ADMIN"`
+   - PROVIDER: chioma@crelab.test / password123 → `role: "PROVIDER"`
+   - CLIENT: sola@crelab.test / password123 → `role: "CLIENT"`
+
+**Files Modified:**
+- `scripts/seed.ts` — Created (rewritten from pre-hash to API-based user creation)
+- `scripts/seed-rollback.ts` — Created
+- `scripts/_test-bcrypt.mjs` — Created (scratch, can be removed)
+- `package.json` — Added `db:seed` and `db:seed:rollback` scripts; `tsx`, `dotenv`, `bcryptjs` deps
+
+**Build Status:** ✅ Seed runs clean. 100+ rows inserted. Login verified for all roles.
+
+**Next Task:**
+Set Vercel env vars, redeploy, verify Dash dashboard. Then: Provider Dashboard, Client Dashboard, Phase 2.
+
+**Key Insight:**
+Better Auth does not accept pre-computed bcryptjs hashes (`$2b$10$`). Users must be created through Better Auth's native signUp flow for login/verification to work. This means any admin "create user" feature must also route through Better Auth's API, not direct DB inserts.
+
+**Assumptions Made:**
+- The Vercel deployment at `https://crelab-ptp.vercel.app` is the correct target for seed user creation (shares the same Supabase DB that the seed's Drizzle client connects to)
+- Seed uses `BETTER_AUTH_URL` from `.env` (defaults to `http://localhost:3000` for local dev)
+
+**Notes / Blockers:**
+- Vercel's production deployment rate-limits to ~3 requests before blocking — adding 3s delay + retry backoff resolved this
+- `npm run db:seed:rollback -- --force` doesn't work because npm's `--force` flag conflicts — use `npx tsx scripts/seed-rollback.ts --force` instead

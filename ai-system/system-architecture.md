@@ -2,7 +2,7 @@
 
 > **Metadata**
 > - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: re-verify before trusting if any architecture-affecting commits have been made since last-verified-against-code
 
 > **Overview:** Crelab is a metadata-driven, config-first creative services marketplace. Architecture follows a layered Next.js App Router pattern with OOP class-based services, interface-first TypeScript, and ConfigContext-driven runtime overrides.
@@ -110,6 +110,23 @@ Data Stores
 
 ---
 
+### Database Seeding Flow
+```
+1. npm run db:seed (tsx scripts/seed.ts)
+2. Checks _seed_version marker in platform_config — exits if already seeded
+3. Creates 10 users via POST /api/auth/sign-up/email (Better Auth API)
+   - Proper password hashing via Better Auth's native bcrypt
+   - Captures returned user IDs
+4. Inserts seed data via Drizzle ORM (providers, packages, portfolio, bookings, etc.)
+5. Writes _seed_version marker for idempotency
+6. npm run db:seed:rollback (tsx scripts/seed-rollback.ts --force)
+   - Deletes all rows in reverse FK dependency order
+   - Removes _seed_version marker
+   - --force flag for partial/no-marker states
+```
+
+---
+
 ## Configuration Points
 
 | Config Key | Purpose | Location | Default |
@@ -161,6 +178,8 @@ All config points have hardcoded fallback values in `config/platform.config.ts` 
 ## Architecture History
 
 See `memory/architecture-history.md` for full chronology.
+
+DB seeding via `scripts/seed.ts` + `scripts/seed-rollback.ts` provides reproducible test data with working authentication (users created via Better Auth API, not pre-hashed passwords).
 
 Files not yet implemented despite being in the planned architecture:
 - `services/ReviewService.ts` (interface exists but no implementation)

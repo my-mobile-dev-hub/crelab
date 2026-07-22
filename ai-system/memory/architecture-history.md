@@ -2,7 +2,7 @@
 
 > **Metadata**
 > - last-updated-by: update-ai-system
-> - last-verified-against-code: 2026-07-05
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: historical entries do not go stale — only the current architecture (in system-architecture.md) needs re-verification
 
 > **Overview:** Chronological record of how Crelab's system architecture has evolved.
@@ -65,5 +65,29 @@ OC-7 full audit completed. All 7 domains clean: wrapper compliance, config compl
 - `services/ReviewService.ts` not implemented (reviews handled inline)
 - `lib/mux.ts` stub only
 - Provider Dashboard and Client Dashboard (Phase 2)
+
+---
+
+### 2026-07-22 — DB Seed System
+
+**State:**
+Created a reproducible database seeding system with working authentication. User creation now goes through Better Auth's HTTP API (`POST /api/auth/sign-up/email` on the Vercel deployment) so passwords are hashed correctly. The seed script creates 10 users, 5 provider profiles, 13 service packages, 14 portfolio items, 8 bookings, 5 payments, 2 reviews, 1 dispute, 9 wallets, 10 wallet transactions, and 30 consent records. A rollback script deletes all data in reverse FK dependency order with a `_seed_version` marker for idempotency.
+
+**Key architectural changes:**
+- `scripts/` directory added: `seed.ts` (275 lines) + `seed-rollback.ts` (87 lines)
+- Seed relies on the Vercel deployment's auth endpoint — requires `BETTER_AUTH_URL` env var
+- `package.json` scripts: `db:seed`, `db:seed:rollback`
+- `tsx` and `dotenv` added as dependencies for script execution
+
+**Architectural insight:**
+Better Auth's password hashing/verification is a black box — pre-computed bcryptjs hashes are rejected even when they match the standard `$2b$10$` format. To create seed users with working passwords, the seed must route through Better Auth's native signUp flow. This has implications for any future admin "create user" functionality — it cannot bypass Better Auth's API.
+
+**Drift resolved:**
+- pre-hashed password approach — replaced with Better Auth API calls
+
+**Remaining drift:**
+- `app/admin/` not `app/(admin)/` — minor, no route group wrapping
+- `services/ReviewService.ts` not implemented (reviews handled inline)
+- `lib/mux.ts` stub only
 
 ---

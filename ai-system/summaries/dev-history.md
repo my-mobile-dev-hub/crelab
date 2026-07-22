@@ -1,8 +1,8 @@
 # Development History
 
 > **Metadata**
-> - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-updated-by: update-ai-system
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: historical entries do not go stale
 
 > **Overview:** Chronological log of completed development work. Each sprint ends with a summary entry. Agents add entries after completing tasks.
@@ -139,3 +139,29 @@ Found the real root cause of Dash ownership verification failure: the Supabase d
 
 **Next Sprint Focus:**
 Set all env vars in Vercel dashboard (`BETTER_AUTH_API_KEY`, `BETTER_AUTH_SECRET`, `DATABASE_URL`), redeploy, verify Dash ownership, then continue with Provider Dashboard, Client Dashboard, Phase 2 features.
+
+---
+
+## 2026-07-22 — DB Seed System + Working Auth Passwords
+
+**Summary:**
+Created a comprehensive database seeding system for the Crelab prototype with reproducible, working authentication. The initial approach used bcryptjs pre-hashing but Better Auth's native bcrypt verification rejected those hashes. Rewrote user creation to call `POST /api/auth/sign-up/email` on the Vercel deployment, capturing the Better Auth-generated user IDs and using those as FK targets throughout the seed data. Added retry-with-backoff for Vercel's rate limiter (429s). Rollback deletes all rows in FK-safe reverse order with a `_seed_version` marker for idempotency.
+
+**Completed:**
+- `scripts/seed.ts` — Creates 10 users via Better Auth API (admin, 5 providers, 4 clients), updates roles/phone numbers in DB, inserts 5 provider profiles, 13 service packages, 14 portfolio items, 8 bookings (various states), 5 payments, 2 reviews, 1 dispute, 9 wallets, 10 wallet transactions, 30 consent records. Seed marker written to platform_config for re-run protection.
+- `scripts/seed-rollback.ts` — Deletes all seed data in reverse FK dependency order. `--force` flag for partial/no-marker states.
+- `package.json` — Added `db:seed` and `db:seed:rollback` scripts with tsx.
+- Verified: all 3 roles (ADMIN, PROVIDER, CLIENT) can log in with `password123` — returns valid tokens.
+
+**Key Changes:**
+- `scripts/seed.ts` — 275 lines, user creation via HTTP to Better Auth sign-up endpoint (not pre-hashing)
+- `scripts/seed-rollback.ts` — 87 lines, FK-safe cascade deletion
+- `scripts/_test-bcrypt.mjs` — Scratch file for bcryptjs testing (can be removed)
+
+**Key Insight:**
+Better Auth's native password verification does not accept bcryptjs `$2b$` hashes even though they are standard format. Users must be created through Better Auth's own `signUp` flow (either HTTP API or server-side `auth.api.signUp`) for login to work. Direct DB inserts with pre-computed hashes create user records that exist but cannot authenticate.
+
+**Build Status:** ✅ Seed creates 100+ rows. Login verified for all roles.
+
+**Next Sprint Focus:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).

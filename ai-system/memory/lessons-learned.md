@@ -1,8 +1,8 @@
 # Lessons Learned
 
 > **Metadata**
-> - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-updated-by: update-ai-system
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: each entry has its own staleness — check supersedes links
 
 > **Overview:** Practical knowledge accumulated during Crelab development. Tracks development process insights and architectural wisdom. Uses supersedes/superseded-by links for evolving practices.
@@ -95,6 +95,24 @@
 
 **Supersedes:** None
 **Superseded by:** None
+
+## DB Seed: Users Must Be Created via Better Auth API — Pre-Hashing Fails
+
+**Context:** Seed script initially used bcryptjs to pre-hash passwords and inserted user + account records directly into the DB. Login always returned 401 "Invalid email or password" even though the hashes were standard `$2b$10$` format.
+
+**What We Learned:**
+1. Better Auth's native bcrypt verification does not accept pre-computed bcryptjs `$2b$` hashes — the hash format or salt rounds don't match what Better Auth expects
+2. Users must be created through Better Auth's `signUp` flow (via HTTP `POST /api/auth/sign-up/email` or server-side `auth.api.signUp()`) for login to work
+3. After creating via the API, you can update the user record (role, phone, etc.) and the password still works
+4. Vercel's production deployment rate-limits aggressive seeding — add 3s delay + exponential backoff retry for 429s
+5. All FK constraints use `ON DELETE CASCADE` but NOT `ON UPDATE CASCADE` — user IDs cannot be reassigned after creation
+
+**Apply When:** Writing seed scripts or any code that creates user accounts programmatically in a Better Auth project.
+
+**Supersedes:** None
+**Superseded by:** None
+
+---
 
 ## Dash Ownership Verification — DB Schema Must Exist
 

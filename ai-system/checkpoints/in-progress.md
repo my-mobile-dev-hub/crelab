@@ -1,36 +1,25 @@
 # In-Progress Work
 
 > **Metadata**
-> - last-updated-by: opencode (execute-feature)
-> - last-verified-against-code: 2026-07-21
+> - last-updated-by: opencode (update-ai-system)
+> - last-verified-against-code: 2026-07-22
 
-**Status:** Complete — Better Auth Dash + DB schema synced.
+**Status:** Complete — DB seed system built and verified. All auth endpoints working.
 
-**Root Cause of Dash verification failure:**
-1. **Database schema not applied** — Supabase tables didn't exist. Any auth DB operation (sign-up, login) returned 500, causing Dash ownership check to fail.
-2. **`BETTER_AUTH_API_KEY` may not be set in Vercel env** — env vars must be added in Vercel dashboard; `.env` file is local-only.
+## Completed This Session (2026-07-22)
 
-**Fixes Applied (Round 1):**
-1. `@better-auth/infra` installed
-2. `lib/auth.ts` — Added `dash()` plugin with explicit `apiKey` option
-3. `.env` — Replaced placeholder `BETTER_AUTH_SECRET` with generated secret
-4. `.env.example` — Added `BETTER_AUTH_API_KEY`
+1. **DB Seed System** — `scripts/seed.ts` creates 10 users via Better Auth API (working passwords), 100+ seed records across all tables. `scripts/seed-rollback.ts` deletes all seed data in FK-safe reverse order.
+2. **Password Fix** — Pre-hashing with bcryptjs didn't work with Better Auth. Rewrote to create users via `POST /api/auth/sign-up/email` on Vercel deployment, capture returned IDs, use them as FK targets.
+3. **Seed verified end-to-end** — All 3 roles (ADMIN, PROVIDER, CLIENT) log in successfully with `password123`.
+4. **Rollback verified** — `--force` flag clears partial state; marker-based idempotency for clean re-seeds.
 
-**Fixes Applied (Round 2):**
-5. `drizzle.config.ts` — Added `dbCredentials.url` for drizzle-kit connectivity
-6. `drizzle-kit push` — Synced schema to Supabase DB ✅
+## Build Status
 
-**Verified Deployed Endpoints:**
-- `GET /api/auth/get-session` → 200 (null) ✅
-- `POST /api/auth/sign-up/email` → 200 (user created) ✅
-- `GET /api/auth/dash/config` → 401 (plugin active) ✅
-- `GET /api/auth/dash/validate` → 401 (plugin active) ✅
-- `GET /api/explore` → 200 (mock data) ✅
+✅ Seed creates 100+ rows. Login verified for all roles. Rollback works with `--force` and without.
 
-**Build Status:** ✅ TypeScript compiles with zero errors. DB schema synced.
+## Next Steps
 
-**Next Steps:**
-1. **Confirm `BETTER_AUTH_API_KEY` is set in Vercel project env vars** (Vercel dashboard → Settings → Environment Variables)
-2. **Confirm `BETTER_AUTH_SECRET` and `DATABASE_URL` are also set** in Vercel
-3. Redeploy to Vercel
-4. Check Better Auth Dash dashboard — verification should now pass
+1. Set `BETTER_AUTH_API_KEY`, `BETTER_AUTH_SECRET`, `DATABASE_URL` in Vercel project env vars
+2. Redeploy to Vercel
+3. Check Better Auth Dash dashboard — ownership verification should now pass
+4. Continue with: Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests)

@@ -2,7 +2,7 @@
 
 > **Metadata**
 > - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: auto-regenerable — can be derived from import analysis tools. Manual content only for conventions and rules that cannot be inferred from code.
 
 > **Overview:** Maps how modules depend on each other. Agents use this to understand the impact of changes.
@@ -58,7 +58,7 @@ Lib Module
   → crypto (HMAC-SHA512 webhook verification)
 
 Drizzle
-  → drizzle/schema.ts (329 lines, single source of truth — exports all tables, enums, relations)
+   → drizzle/schema.ts (463 lines, single source of truth — exports all tables, enums, relations)
   → postgres driver (lib/db.ts)
   → drizzle-kit (migrations)
 ```
@@ -72,6 +72,8 @@ Drizzle
 | next | Framework | app/, pages, middleware |
 | postgres | PostgreSQL driver | lib/db.ts |
 | drizzle-orm | ORM, schema, relations | drizzle/, services/ |
+| tsx | TypeScript execution engine | scripts/ (seed, rollback) |
+| dotenv | Environment variable loading | scripts/ (seed, rollback) |
 | better-auth | Authentication + plugins | lib/auth.ts |
 | @better-auth/infra | Dash dashboard plugin + sentinel security | lib/auth.ts |
 | @tanstack/react-query | Client data fetching | hooks/useAuth.ts, app/page.tsx |
@@ -80,6 +82,7 @@ Drizzle
 | shadcn/ui (via Cl* wrappers) | UI primitives (wrapped) | components/ui/ |
 | zod | Schema validation (package.json) | — |
 | Not yet wired: Paystack SDK, Cloudinary SDK, Mux SDK, googleapis, resend | — | — |
+| bcryptjs | Password hashing (seed — replaced by Better Auth API calls) | scripts/seed.ts |
 | @sanity/client, @sanity/image-url | Sanity CMS content fetching + image URL builder | lib/sanity.ts, sanity/, app/(public)/blog/ |
 
 ---

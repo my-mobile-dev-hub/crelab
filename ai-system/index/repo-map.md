@@ -2,7 +2,7 @@
 
 > **Metadata**
 > - last-updated-by: execute-feature
-> - last-verified-against-code: 2026-07-21
+> - last-verified-against-code: 2026-07-22
 > - staleness-policy: auto-regenerable — can be derived from `tree` command. Manual content only where intent cannot be derived from structure.
 
 > **Overview:** Visual map of the Crelab project folder structure with purpose descriptions.
@@ -13,6 +13,7 @@
 
 ```
 crelab/
+├── .github/                 # GitHub Actions workflows
 ├── .ai-system/              # AI-assisted development governance
 ├── app/                     # Next.js 15 App Router
 │   ├── globals.css          # Global styles + CSS custom properties
@@ -89,6 +90,10 @@ crelab/
 │   └── migrations/         # Generated SQL migrations
 ├── hooks/
 │   └── useAuth.ts          # Client-side auth hook (signIn, signOut, signUp)
+├── scripts/                 # Database seeding + utility scripts
+│   ├── seed.ts             # DB seed: creates users via Better Auth API + inserts all seed data
+│   ├── seed-rollback.ts    # Rollback: deletes all seed data in FK-safe reverse order
+│   └── _test-bcrypt.mjs    # Scratch: bcryptjs hash testing (can be removed)
 ├── middleware.ts            # Route protection (auth + admin gate)
 └── public/                 # Static assets
 ```
@@ -113,8 +118,9 @@ crelab/
 | `types/` | Global TypeScript interfaces and enums — single source of truth | `index.ts`, `explore.ts` |
 | `config/` | Platform configuration with hardcoded fallback + DB override | `platform.config.ts` |
 | `lib/` | Third-party SDK wrappers + shared utilities | `auth.ts`, `db.ts`, `paystack.ts`, `sanity.ts`, `config-context.tsx`, `consent.ts` |
-| `drizzle/` | Database schema, migrations, drizzle-kit config | `schema.ts`, `migrations/` |
+| `drizzle/` | Database schema, migrations, drizzle-kit config | `schema.ts` (463 lines, 14 tables + 6 enums + relations), `migrations/` |
 | `hooks/` | Custom React hooks | `useAuth.ts` |
+| `scripts/` | DB seeding: creates users via Better Auth API, inserts seed data, rollback | `seed.ts`, `seed-rollback.ts` |
 
 ---
 
