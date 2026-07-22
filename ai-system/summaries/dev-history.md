@@ -165,3 +165,60 @@ Better Auth's native password verification does not accept bcryptjs `$2b$` hashe
 
 **Next Sprint Focus:**
 Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+---
+
+## 2026-07-22 — Paystack Configuration + Google OAuth + Light Theme Docs
+
+**Summary:**
+Production readiness pass: added Paystack secret/public key env vars, wired Google OAuth via Better Auth social providers with sign-in button on login page, added error handling to the auth hook to prevent infinite loading states, and documented the light theme system in the design system docs. The `.env.example` was also updated to include all missing environment variables across Paystack, Google OAuth, Cloudinary, Sanity CMS, and Google Drive.
+
+**Completed:**
+- Paystack `PAYSTACK_SECRET_KEY` and `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` added to `.env` and `.env.example`
+- Google OAuth added to `lib/auth.ts` via `socialProviders.google` with env var fallback
+- Google sign-in button added to login page with "or continue with email/phone" divider
+- `useAuth` hook extended with `signInWithGoogle()` and error catching on `getSession()` to prevent infinite loading
+- `design-system.md` updated with full `.light` palette and theme system docs (System/Light/Dark modes, ThemeToggler, ThemeContext)
+- `.env.example` completed with all service env vars (Paystack, Google, Cloudinary, Sanity, Drive, app URL)
+- `repo-map.md` updated with team, wallet, bug-report, forgot-password, theme-context, and missing services
+- `system-architecture.md` service layer diagram updated with WalletService, MilestoneService, MockDataService
+
+**Key Changes:**
+- `.env` — added `PAYSTACK_SECRET_KEY`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- `lib/auth.ts` — added `socialProviders.google` block
+- `hooks/useAuth.ts` — added `signInWithGoogle`, `.catch()` on getSession, error propagation on signIn/signUp
+- `app/(auth)/login/page.tsx` — added Google OAuth button + "or continue with" divider
+- `.ai-system/design-system.md` — added light theme color palette, theme system documentation
+- `.ai-system/index/repo-map.md` — added missing directories and components
+
+**Build Status:** ✅ TypeScript compiles with zero errors. Lint passes with zero errors.
+
+**Next Sprint Focus:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests). After deploying, set all env vars in Vercel project dashboard and trigger fresh deployment.
+
+---
+
+## 2026-07-22 — Logo Integration + Crellab Branding
+
+**Summary:**
+Integrated brand assets (icon + full logo) into the application using a config-driven approach. Added `logoPath` and `iconPath` fields to `IPlatformConfig` so both are single-source-of-truth config values. The icon is used for favicon, mobile navbars, auth pages, and compact contexts; the full logo is used for expanded desktop navbars, the landing page hero section, and the footer. Replaced all placeholder text-based "CreLab" logos (colored squares) across the app with the actual image assets. Renamed the platform from "CreLab" to "Crellab" for SEO/uniqueness.
+
+**Completed:**
+- Added `logoPath` / `iconPath` to config type + defaults → single source of truth for brand assets
+- Favicon + Apple touch icon via `app/layout.tsx` metadata
+- Desktop navbar: `primary-logo.png`; Mobile navbar + overlay: `icon.png`
+- Landing hero: full logo above tagline
+- Auth pages (login, register, forgot-password): icon + name
+- Footer: full logo replacing text heading
+- Admin sidebar: icon replacing colored square
+- Sanity CMS title: "CreLab" → "Crellab"
+- Branding documented in design system: "Logos & Branding" section
+
+**Key Changes:**
+- `types/index.ts` — `IPlatformConfig.logoPath`, `IPlatformConfig.iconPath`
+- `config/platform.config.ts` — `name: "Crellab"`, `logoPath: "/primary-logo.png"`, `iconPath: "/icon.png"`
+- `app/layout.tsx` — favicon metadata using config value
+- `components/shared/Navbar.tsx` — config-driven logo/icon images
+- All auth pages — icon images instead of placeholder colored squares
+
+**Build Status:** ✅ TypeScript compiles with zero errors. Lint passes (pre-existing warnings only).

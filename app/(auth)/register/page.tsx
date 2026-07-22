@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlatformConfig } from "@/lib/config-context";
 import { captureConsent } from "@/lib/consent";
@@ -68,8 +69,13 @@ function RegisterForm() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-[rgba(10,10,10,0.85)] p-4">
       <div className="w-full max-w-[420px] max-h-[90vh] overflow-y-auto rounded-[20px] border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-3 h-3 bg-[var(--color-accent)] rotate-45 rounded-sm shrink-0" />
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <Image
+            src={platformConfig.iconPath}
+            alt={platformConfig.name}
+            width={28}
+            height={28}
+          />
           <span className="font-[family-name:var(--font-display)] font-extrabold text-[var(--color-text-primary)]">
             {platformConfig.name}
           </span>

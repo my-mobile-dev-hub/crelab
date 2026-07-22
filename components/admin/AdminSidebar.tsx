@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlatformConfig } from "@/lib/config-context";
 import { Settings, Grid3X3, UserCheck, AlertTriangle, Users, Bug } from "lucide-react";
@@ -47,14 +48,19 @@ export function AdminSidebar() {
   return (
     <aside className="fixed top-0 left-0 w-[240px] h-screen bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col z-30">
       <div
-        className="flex items-center gap-2 px-5 py-5 cursor-pointer"
-        onClick={() => router.push("/admin/config")}
-      >
-        <div className="w-3 h-3 bg-[var(--color-accent)] rotate-45 flex-shrink-0" />
-        <span className="font-[family-name:var(--font-display)] font-extrabold text-[18px] text-[var(--color-text-primary)]">
-          {platformConfig.name}
-        </span>
-      </div>
+          className="flex items-center gap-3 px-5 py-5 cursor-pointer"
+          onClick={() => router.push("/admin/config")}
+        >
+          <Image
+            src={platformConfig.iconPath}
+            alt={platformConfig.name}
+            width={24}
+            height={24}
+          />
+          <span className="font-[family-name:var(--font-display)] font-extrabold text-[18px] text-[var(--color-text-primary)]">
+            {platformConfig.name}
+          </span>
+        </div>
       <nav className="flex-1 py-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { PlatformConfigService } from "@/services/PlatformConfigService";
 import { DEFAULT_CONFIG } from "@/config/platform.config";
 import { ThemeToggler } from "./ThemeToggler";
@@ -22,9 +23,13 @@ export async function Footer() {
         <div className="grid gap-8 grid-cols-2 lg:grid-cols-4">
           <div className="flex gap-4">
             <div className="w-full flex-1">
-              <h4 className="mb-3 font-[family-name:var(--font-display)] text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--color-text-tertiary)]">
-                {config.name}
-              </h4>
+              <Image
+                src={config.logoPath ?? DEFAULT_CONFIG.logoPath}
+                alt={config.name}
+                width={120}
+                height={32}
+                className="mb-3 h-8 w-auto"
+              />
               <p className="text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
                 {config.tagline}
               </p>

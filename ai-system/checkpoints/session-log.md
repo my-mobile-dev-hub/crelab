@@ -421,3 +421,108 @@ Better Auth does not accept pre-computed bcryptjs hashes (`$2b$10$`). Users must
 **Notes / Blockers:**
 - Vercel's production deployment rate-limits to ~3 requests before blocking — adding 3s delay + retry backoff resolved this
 - `npm run db:seed:rollback -- --force` doesn't work because npm's `--force` flag conflicts — use `npx tsx scripts/seed-rollback.ts --force` instead
+
+---
+
+## Session 11 — 2026-07-22 (Paystack + Google OAuth + Production Readiness)
+
+**Completed:**
+
+1. **Paystack env vars** — Added `PAYSTACK_SECRET_KEY` and `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` to `.env` and `.env.example`
+2. **Google OAuth (Better Auth)** — Added `socialProviders.google` to `lib/auth.ts` with `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` env vars
+3. **Google sign-in button** — Added to `app/(auth)/login/page.tsx` with Google SVG icon + "or continue with" divider
+4. **useAuth hook** — Added `signInWithGoogle()` method, added `.catch(() => setIsLoading(false))` to prevent infinite loading when session fetch fails, added error propagation from `signIn`/`signUp`
+5. **Design system docs** — Updated `design-system.md` with full light theme palette, theme system documentation (System/Light/Dark modes, ThemeToggler, ThemeContext)
+6. **`.env.example`** — Added all missing vars: Paystack keys, Google OAuth, Cloudinary, Sanity, Google Drive API, public app URL
+7. **AI system sync** — Updated `repo-map.md` with new folders/files (team, wallet, bug-report, forgot-password, theme-context, missing services), updated `system-architecture.md` service layer with WalletService, MilestoneService, MockDataService, updated `task-queue.md` with completed tasks
+
+**Files Modified:**
+- `.env` — Added Paystack + Google OAuth env vars
+- `.env.example` — Full template with all required vars
+- `lib/auth.ts` — Added `socialProviders.google`
+- `hooks/useAuth.ts` — Added `signInWithGoogle`, error handling for session fetch, error propagation
+- `app/(auth)/login/page.tsx` — Added Google sign-in button + divider
+- `ai-system/design-system.md` — Added light theme palette + theme system docs
+- `ai-system/system-architecture.md` — Added WalletService, MilestoneService, MockDataService
+- `ai-system/index/repo-map.md` — Full tree update with new dirs/files
+- `ai-system/planning/task-queue.md` — Added completed tasks
+- `ai-system/checkpoints/in-progress.md` — Updated status
+- `ai-system/checkpoints/session-log.md` — This entry
+
+**Next Task:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+**Paystack Dashboard Setup Required:**
+1. Set `PAYSTACK_SECRET_KEY` and `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` in Vercel env vars
+2. Configure webhook URL at Paystack dashboard → Settings → Webhooks → Add URL: `https://crelab-ptp.vercel.app/api/webhooks/paystack`
+3. Enable webhook events: `charge.success`, `transfer.success`, `transfer.failed`, `transfer.reversed`, `dedicatedaccount.assign.success`
+4. For escrow: ensure your Paystack business account has **Subaccounts** enabled
+5. For automatic bank transfers: ensure your Paystack balance has sufficient funds
+6. For DVA: ensure **Dedicated Virtual Account** feature is enabled on your Paystack account
+
+**Google OAuth Dashboard Setup Required:**
+1. Create a project at https://console.cloud.google.com/apis/credentials
+2. Add OAuth 2.0 Client ID (Web application type)
+3. Set Authorized redirect URIs:
+   - `https://crelab-ptp.vercel.app/api/auth/callback/google`
+   - `http://localhost:3000/api/auth/callback/google` (for local dev)
+4. Copy Client ID → `GOOGLE_CLIENT_ID` and Client Secret → `GOOGLE_CLIENT_SECRET` in Vercel env vars
+
+**Production Deployment Checklist:**
+1. ✅ `NEXT_PUBLIC_MOCK_DATA=false` set in `.env` (also set in Vercel env vars)
+2. Set all env vars in Vercel project dashboard: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_API_KEY`, `PAYSTACK_SECRET_KEY`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+3. Trigger a fresh deployment on Vercel
+4. Run `npm run db:seed` against production to populate seed data
+
+---
+
+## Session 12 — 2026-07-22 (Logo Integration + Branding + Crellab Rename)
+
+**Completed:**
+
+1. **Logo & icon config fields** — Added `logoPath` and `iconPath` to `IPlatformConfig` type and `DEFAULT_CONFIG` with `/primary-logo.png` and `/icon.png`
+2. **Project rename to Crellab** — Changed `DEFAULT_CONFIG.name` from "CreLab" to "Crellab"
+3. **Favicon** — Added `icons.icon` and `icons.apple` metadata using `DEFAULT_CONFIG.iconPath` in `app/layout.tsx`
+4. **Navbar logo** — Desktop navbar now shows `primary-logo.png` (full logo), mobile shows `icon.png`; mobile overlay shows icon + name
+5. **Landing page hero** — Added `primary-logo.png` above tagline in hero section
+6. **Auth pages** — Login, register, forgot-password pages now show `icon.png` + name instead of colored square + text
+7. **Footer** — Now shows `primary-logo.png` instead of text heading
+8. **Admin sidebar** — Now shows `icon.png` instead of colored square
+9. **Sanity config** — Updated title from "CreLab" to "Crellab"
+10. **Design system docs** — Added Logos & Branding section documenting the config-driven asset system
+11. **System architecture** — Added `LOGO_PATH` and `ICON_PATH` to config table
+
+**Files Modified:**
+- `types/index.ts` — Added `logoPath`, `iconPath` to `IPlatformConfig`
+- `config/platform.config.ts` — Added logo/icon defaults, renamed to "Crellab"
+- `app/layout.tsx` — Added favicon metadata with `iconPath`
+- `components/shared/Navbar.tsx` — Logo image in desktop, icon in mobile + mobile overlay
+- `components/shared/Footer.tsx` — Logo image replacing text heading
+- `components/admin/AdminSidebar.tsx` — Icon image replacing colored square
+- `app/page.tsx` — Logo in hero section
+- `app/(auth)/login/page.tsx` — Icon + name replacing colored square
+- `app/(auth)/register/page.tsx` — Icon + name replacing colored square
+- `app/(auth)/forgot-password/page.tsx` — Icon + name replacing colored square (2 instances)
+- `sanity/sanity.config.ts` — Title updated to "Crellab"
+- `ai-system/system-architecture.md` — Added LOGO_PATH, ICON_PATH config entries
+- `ai-system/design-system.md` — Added Logos & Branding section
+- `ai-system/index/repo-map.md` — Updated public/ description
+- `ai-system/planning/task-queue.md` — Added completed tasks
+- `ai-system/checkpoints/in-progress.md` — Updated status
+- `ai-system/checkpoints/session-log.md` — This entry
+
+**Build Status:** ✅ TypeScript compiles with zero errors. Lint passes with zero errors.
+
+**Next Task:**
+Provider Dashboard, Client Dashboard, Phase 2 features (messaging, notifications, tests).
+
+**Logo Customisation (Config-Driven):**
+To change the logo/brand:
+1. Place new image files in `public/` (e.g., `/public/my-logo.png`, `/public/my-icon.png`)
+2. Update `config/platform.config.ts`:
+   ```ts
+   logoPath: "/my-logo.png",
+   iconPath: "/my-icon.png",
+   name: "Your Brand",
+   ```
+3. Rebuild and redeploy. Zero component changes needed.

@@ -23,6 +23,7 @@ export interface UseAuthReturn {
   isAuthenticated: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<AuthUser | null>;
 }
@@ -59,6 +60,8 @@ export function useAuth(): UseAuthReturn {
         setUser(session.data.user as unknown as AuthUser);
       }
       setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
     });
   }, [mockMode]);
 
@@ -71,6 +74,17 @@ export function useAuth(): UseAuthReturn {
     if (result.data?.user) {
       setUser(result.data.user as unknown as AuthUser);
     }
+    if (result.error) {
+      throw new Error(result.error.message || result.error.statusText || "Sign in failed");
+    }
+  }, [mockMode]);
+
+  const signInWithGoogle = useCallback(async () => {
+    if (mockMode) {
+      setUser(MOCK_USER);
+      return;
+    }
+    await authClient.signIn.social({ provider: "google" });
   }, [mockMode]);
 
   const signOut = useCallback(async () => {
@@ -94,10 +108,13 @@ export function useAuth(): UseAuthReturn {
       if (result.data?.user) {
         setUser(result.data.user as unknown as AuthUser);
       }
+      if (result.error) {
+        throw new Error(result.error.message || result.error.statusText || "Sign up failed");
+      }
       return result.data?.user ? (result.data.user as unknown as AuthUser) : null;
     },
     [mockMode],
   );
 
-  return { user, isAuthenticated: !!user, isLoading, signIn, signOut, signUp };
+  return { user, isAuthenticated: !!user, isLoading, signIn, signInWithGoogle, signOut, signUp };
 }

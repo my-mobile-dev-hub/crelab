@@ -340,6 +340,8 @@ export interface IPlatformConfig {
   name: string;
   tagline: string;
   primaryColor: string;
+  logoPath: string;
+  iconPath: string;
   feeRate: number;
   escrowReleaseDays: number;
   cancellationPolicy: ICancellationPolicy;

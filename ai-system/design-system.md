@@ -1,18 +1,31 @@
 # Design System
 
 > **Metadata**
-> - last-updated-by: execute-feature
-> - last-updated-by: update-ai-system
+> - last-updated-by: opencode (execute-feature)
 > - last-verified-against-code: 2026-07-22
 > - staleness-policy: re-verify if UI components or styling dependencies change
 
-> **Overview:** Dark-dominant, video-first design direction. Electric yellow-green accent (#E8FF47) on near-black (#0A0A0A). All tokens defined as CSS custom properties with platform config overridability. The colour, typography, and spacing tables below are the single source of truth for design tokens — components must consume these tokens via Cl* wrappers rather than redeclaring values.
+> **Overview:** Dark-dominant, video-first design direction with a full light theme alternative. Electric yellow-green accent (#E8FF47) on near-black (#0A0A0A) for dark mode, earthier olive accent (#A3B800) on near-white (#FAFAF9) for light mode. Theme switching via tabbed toggler (System/Light/Dark) with localStorage persistence. All tokens defined as CSS custom properties with platform config overridability. The colour, typography, and spacing tables below are the single source of truth for design tokens — components must consume these tokens via Cl* wrappers rather than redeclaring values.
 
 ---
 
 ## Visual Language
 
-### Colour Palette
+### Theme System
+
+The app supports three theme modes controlled by `ThemeContext`:
+
+| Mode | Behaviour |
+|------|-----------|
+| **System** | Follows OS `prefers-color-scheme` media query via `matchMedia` listener |
+| **Light** | Applies `.light` class to `<html>`, uses light colour tokens |
+| **Dark** | Default; uses `:root` colour tokens (no class needed) |
+
+- `ThemeToggler` component: tabbed radiogroup with System / Light / Dark buttons
+- Persisted in `localStorage` under key `app-theme`
+- `ThemeContext` exposes `{ mode, resolved, setMode }` — `resolved` is the computed "light" or "dark" value
+
+### Dark Palette (`:root` — default)
 
 ```css
 :root {
@@ -54,7 +67,64 @@
 | error | #F87171 | Dispute, error |
 | info | #60A5FA | Informational |
 
-Note: `--color-accent` must come from platformConfig.primaryColor at runtime (JS sets CSS var on mount). The #E8FF47 value is the hardcoded fallback.
+### Light Palette (`.light` class)
+
+```css
+.light {
+  --color-bg:              #FAFAF9;
+  --color-surface:         #FFFFFF;
+  --color-surface-raised:  #F2F2F0;
+  --color-border:          #E4E4E0;
+  --color-border-mid:      #D4D4D0;
+  --color-accent:          #A3B800;
+  --color-accent-dim:      #8FA000;
+  --color-accent-muted:    #F0F4D0;
+  --color-text-primary:    #161615;
+  --color-text-secondary:  #6B6B68;
+  --color-text-tertiary:   #9C9C98;
+  --color-text-inverse:    #FAFAF9;
+  --color-success:         #16A34A;
+  --color-warning:         #CA8A04;
+  --color-error:           #DC2626;
+  --color-info:            #2563EB;
+  --color-escrow-held:     #CA8A04;
+  --color-escrow-progress: #7C3AED;
+  --color-escrow-released: #16A34A;
+  --color-escrow-disputed: #DC2626;
+}
+```
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| primary / accent | #A3B800 | CTAs, highlights, active states |
+| bg | #FAFAF9 | Main page background |
+| surface | #FFFFFF | Cards, panels, modals |
+| surface-raised | #F2F2F0 | Elevated cards, hover states |
+| border | #E4E4E0 | Subtle dividers |
+| text-primary | #161615 | Headings, primary content |
+| text-secondary | #6B6B68 | Body copy, labels |
+| text-tertiary | #9C9C98 | Placeholders, disabled |
+| success | #16A34A | Released, verified |
+| warning | #CA8A04 | Pending, in progress |
+| error | #DC2626 | Dispute, error |
+| info | #2563EB | Informational |
+
+Note: `--color-accent` must come from platformConfig.primaryColor at runtime (JS sets CSS var on mount). The #E8FF47 / #A3B800 values are the hardcoded fallbacks.
+
+### Logos & Branding
+
+Brand assets are config-driven via `platformConfig`:
+
+| Asset | Config Key | Default Path | Usage |
+|-------|-----------|-------------|-------|
+| Full Logo | `logoPath` | `/primary-logo.png` | Desktop navbar, hero/landing page, footer |
+| Icon | `iconPath` | `/icon.png` | Mobile navbar, auth pages (login/register/forgot-password), admin sidebar, favicon |
+
+**Logo placement rules:**
+- **full logo** (`logoPath`): expanded desktop navbars, hero sections, landing pages, footer — anywhere there's horizontal space
+- **icon** (`iconPath`): collapsed/mobile navbars, auth modals, admin sidebar, favicon/Apple touch icon — anywhere the layout is compact
+
+Both paths are configured in `config/platform.config.ts` as `logoPath` and `iconPath`. Changing brand assets requires only updating the config and placing new files in `public/`.
 
 ### Typography
 

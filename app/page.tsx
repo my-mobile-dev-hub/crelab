@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlatformConfig } from "@/lib/config-context";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronUp, Play } from "lucide-react";
 import { ExploreFilterBar } from "@/components/explore/ExploreFilterBar";
 import { ExploreGrid } from "@/components/explore/ExploreGrid";
@@ -70,6 +71,14 @@ export default function HomePage() {
         <section className="w-full min-h-[220px] bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-bg)] flex items-center px-6 py-12">
           <div className="max-w-[1200px] w-full mx-auto flex flex-row justify-between items-center gap-8 max-[640px]:flex-col max-[640px]:text-center">
             <div className="flex-1 max-w-[560px]">
+              <Image
+                src={platformConfig.logoPath}
+                alt={platformConfig.name}
+                width={160}
+                height={40}
+                className="mb-5 h-10 w-auto"
+                priority
+              />
               <h1 className="font-[family-name:var(--font-display)] font-extrabold text-[3rem] max-[640px]:text-[1.875rem] text-[var(--color-text-primary)] leading-[1.15] tracking-[-0.02em] mb-6">
                 {platformConfig.tagline}
               </h1>

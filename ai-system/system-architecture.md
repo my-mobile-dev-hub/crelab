@@ -30,6 +30,9 @@ Service Layer (services/)
     |-- PaymentService          -- Paystack integration, subaccount split
     |-- PlatformConfigService   -- Config CRUD with DB override + cached reads
     |-- ExploreService          -- Provider search, filter, sort, cursor pagination
+    |-- WalletService           -- Wallet CRUD, topup, debit, credit, withdrawal, DVA
+    |-- MilestoneService        -- Milestone lifecycle (create, fund, submit, approve, dispute)
+    |-- MockDataService         -- Mock data fallback when DB unavailable
     |
     v
 Data Access Layer
@@ -131,9 +134,11 @@ Data Stores
 
 | Config Key | Purpose | Location | Default |
 |-----------|---------|----------|---------|
-| PLATFORM_NAME | Public-facing platform name | platform.config.ts | 'Crelab' |
+| PLATFORM_NAME | Public-facing platform name | platform.config.ts | 'Crellab' |
 | PLATFORM_TAGLINE | Hero section tagline | platform.config.ts | 'Get hired for your creativity, not your follower count.' |
 | PRIMARY_COLOR | Accent colour (hex) | platform.config.ts | '#E8FF47' |
+| LOGO_PATH | Full logo image path (expanded navbars, hero) | platform.config.ts | '/primary-logo.png' |
+| ICON_PATH | Icon image path (favicon, collapsed nav, auth pages) | platform.config.ts | '/icon.png' |
 | FEE_RATE | Platform commission (decimal) | platform.config.ts | 0.05 |
 | ESCROW_RELEASE_DAYS | Days after service date for auto-release | platform.config.ts | 5 |
 | CATEGORIES | Category slugs + field schema JSONB | platform.config.ts | ['content-creator', 'cinematographer'] |

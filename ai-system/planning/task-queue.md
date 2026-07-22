@@ -33,6 +33,11 @@ All Milestones substantially complete. Blog system, sitemap/robots completed. Re
 | Size | Task | Status |
 |------|------|--------|
 | [XL] | Payment System Expansion — Wallet, Milestone, Direct modes | [x] |
+| [S] | Google OAuth (Better Auth social provider) + sign-in UI | [x] |
+| [S] | Paystack env vars + production config | [x] |
+| [S] | Light theme design system documentation | [x] |
+| [S] | Logo & icon integration (config-driven, favicon, navbars, landing, auth pages) | [x] |
+| [S] | Rename project to "Crellab" in config | [x] |
 | [M] | Write tests for all services (incl. payment expansion) | [ ] |
 | [M] | Provider Dashboard (full) with earnings, kanban pipeline, availability calendar | [ ] |
 | [M] | Client Dashboard: active bookings, booking history, payment history | [ ] |
